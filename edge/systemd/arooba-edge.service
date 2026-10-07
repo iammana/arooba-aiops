@@ -1,0 +1,16 @@
+[Unit]
+Description=Arooba-AIOps Edge Telemetry Daemon for Raspberry Pi 5
+After=network.target hostapd.service dnsmasq.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/home/pi/arooba-aiops
+Environment="PATH=/home/pi/arooba-aiops/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+Environment="WLAN_INTERFACE=wlan0"
+ExecStart=/home/pi/arooba-aiops/.venv/bin/uvicorn edge.daemon:app --host 0.0.0.0 --port 8000
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

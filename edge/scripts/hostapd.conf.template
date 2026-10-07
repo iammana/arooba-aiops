@@ -1,0 +1,25 @@
+# Aruba-AIOps Raspberry Pi 5 AP Configuration
+# Interface configuration
+interface=wlan0
+driver=nl80211
+
+# Wi-Fi Network Information
+ssid=Aruba-AIOps-Lab
+hw_mode=a
+channel=36
+ieee80211d=1
+country_code=CA
+ieee80211n=1
+ieee80211ac=1
+wmm_enabled=1
+
+# Security (WPA2-PSK)
+auth_algs=1
+wpa=2
+wpa_key_mgmt=WPA-PSK
+rsn_pairwise=CCMP
+wpa_passphrase=AroobaAiOps2026!
+
+# Enterprise Roaming & Fast Transition (802.11k/v/r support if supported by driver)
+# ieee80211r=1
+# bss_transition=1
