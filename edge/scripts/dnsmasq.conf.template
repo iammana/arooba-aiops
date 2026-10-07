@@ -1,4 +1,4 @@
-# Aruba-AIOps dnsmasq configuration for Raspberry Pi 5 AP
+# Arooba-AIOps dnsmasq configuration for Raspberry Pi 5 AP
 interface=wlan0
 dhcp-range=192.168.4.10,192.168.4.200,255.255.255.0,24h
 domain=wlan

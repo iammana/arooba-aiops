@@ -1,5 +1,5 @@
 """
-Diagnostic and Remediation Tools for Aruba-AIOps Agents.
+Diagnostic and Remediation Tools for Arooba-AIOps Agents.
 Exposed as function tools for LLM reasoning and the AIOps execution engine.
 """
 

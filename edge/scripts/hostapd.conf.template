@@ -1,10 +1,10 @@
-# Aruba-AIOps Raspberry Pi 5 AP Configuration
+# Arooba-AIOps Raspberry Pi 5 AP Configuration
 # Interface configuration
 interface=wlan0
 driver=nl80211
 
 # Wi-Fi Network Information
-ssid=Aruba-AIOps-Lab
+ssid=Arooba-AIOps-Lab
 hw_mode=a
 channel=36
 ieee80211d=1

@@ -235,7 +235,7 @@ No active RF anomalies, roaming failures, or infrastructure bottlenecks detected
 
         return {
             "success": True,
-            "provider": "Aruba-AIOps Expert Rule Engine (Deterministic)",
+            "provider": "Arooba-AIOps Expert Rule Engine (Deterministic)",
             "trace": trace,
             "final_report": final_report,
             "remediation": remediation_performed,

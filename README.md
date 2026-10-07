@@ -6,7 +6,7 @@
 [![Wi-Fi 6/6E Telemetry](https://img.shields.io/badge/Wi--Fi-802.11ax%20%7C%20802.11v%2Fk-orange.svg)](#)
 
 > **Autonomous Network Operations & Telemetry Agent for Enterprise Wi-Fi.**  
-> *Inspired by HPE Aruba Central AIOps, with dual support for Cloud Simulation and Physical Edge APs (Raspberry Pi 5).*
+> *Inspired by enterprise AIOps architectures, with dual support for Cloud Simulation and Physical Edge APs (Raspberry Pi 5).*
 
 ---
 
@@ -99,13 +99,13 @@ Open your browser to `http://localhost:8501`. You can immediately:
 
 ## 🍓 Raspberry Pi 5 Hardware Setup (Optional)
 
-If you have a Raspberry Pi 5, you can turn it into an authentic Aruba-style Edge AP.
+If you have a Raspberry Pi 5, you can turn it into an authentic Arooba-style Edge AP.
 
 ```
                     ┌───────────────────────────────┐
                     │     Raspberry Pi 5 (Edge)     │
                     │                               │
-                    │   SSID: Aruba-AIOps-Lab       │
+                    │   SSID: Arooba-AIOps-Lab      │
                     │   hostapd (802.11ac / 5GHz)   │
                     │   dnsmasq (192.168.4.1/24)    │
                     │   arooba-edge.service (:8000) │
@@ -128,7 +128,7 @@ sudo bash edge/scripts/setup_pi_ap.sh
 This automated script will:
 * Install `hostapd`, `dnsmasq`, and `wireless-tools`.
 * Configure static IP `192.168.4.1/24` on `wlan0`.
-* Broadcast SSID **`Aruba-AIOps-Lab`** (WPA2 passphrase: `AroobaAiOps2026!`).
+* Broadcast SSID **`Arooba-AIOps-Lab`** (WPA2 passphrase: `AroobaAiOps2026!`).
 * Enable IP forwarding & NAT (routing Wi-Fi traffic out `eth0`).
 * Launch the `arooba-edge` FastAPI daemon on port `8000`.
 
@@ -140,7 +140,7 @@ TELEMETRY_SOURCE=hardware
 EDGE_AP_HOST=http://192.168.4.1:8000
 ```
 
-Now, connect your smartphone or laptop to `Aruba-AIOps-Lab`. The AI Agent will read your phone's real RSSI, SNR, and PHY bitrate directly from the Pi 5's Broadcom wireless driver!
+Now, connect your smartphone or laptop to `Arooba-AIOps-Lab`. The AI Agent will read your phone's real RSSI, SNR, and PHY bitrate directly from the Pi 5's Broadcom wireless driver!
 
 ---
 
@@ -168,7 +168,7 @@ arooba-aiops/
 │   ├── config.py                  # Environment config
 │   ├── telemetry_client.py        # Unified interface (Simulator vs Hardware)
 │   ├── tools.py                   # Diagnostic & Remediation tools
-│   ├── prompts.py                 # HPE Aruba Tier-3 engineering prompts
+│   ├── prompts.py                 # Enterprise Tier-3 engineering prompts
 │   └── agent.py                   # Multi-provider agent orchestrator
 │
 ├── simulator/                     # In-Memory Multi-AP Campus Simulator

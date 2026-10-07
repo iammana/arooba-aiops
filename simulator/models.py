@@ -59,7 +59,7 @@ try:
     class AccessPoint(BaseModel):
         ap_id: str
         name: str
-        model: str = "Aruba AP-635 (Wi-Fi 6E)"
+        model: str = "Arooba AP-635 (Wi-Fi 6E)"
         location: str = "Montreal HQ - Floor 3"
         bssid_2g: str = "00:0b:86:11:22:33"
         bssid_5g: str = "00:0b:86:11:22:34"
@@ -114,7 +114,7 @@ except ImportError:
     class AccessPoint:
         ap_id: str
         name: str
-        model: str = "Aruba AP-635 (Wi-Fi 6E)"
+        model: str = "Arooba AP-635 (Wi-Fi 6E)"
         location: str = "Montreal HQ - Floor 3"
         bssid_2g: str = "00:0b:86:11:22:33"
         bssid_5g: str = "00:0b:86:11:22:34"

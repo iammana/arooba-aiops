@@ -27,7 +27,7 @@ st.markdown(
     .main-header {
         font-size: 2.2rem;
         font-weight: 700;
-        color: #ff8300; /* Aruba Orange */
+        color: #ff8300; /* Accent Orange */
         margin-bottom: 0px;
     }
     .sub-header {
@@ -51,9 +51,8 @@ st.markdown(
 
 # ================= Sidebar Controls =================
 with st.sidebar:
-    st.image("https://www.hpe.com/content/dam/hpe/logos/hpe-pri-wht-rgb.svg", width=160)
-    st.markdown("### **Arooba-AIOps Engine**")
-    st.caption("Autonomous Network Operations for HPE Aruba Wi-Fi APs")
+    st.markdown("## 📡 **Arooba-AIOps**")
+    st.caption("Autonomous Network Operations for Enterprise Wi-Fi APs")
 
     st.divider()
 
@@ -94,7 +93,7 @@ with st.sidebar:
         st.rerun()
 
     st.divider()
-    st.caption("Engineered for HPE Aruba Networking Montreal")
+    st.caption("Arooba Autonomous Network Operations Engine")
 
 
 # ================= Main Dashboard =================

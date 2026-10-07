@@ -1,5 +1,5 @@
 """
-Simulation Engine for Aruba-AIOps.
+Simulation Engine for Arooba-AIOps.
 Maintains state for simulated Access Points, Clients, and Network Services.
 Supports injecting realistic enterprise Wi-Fi troubleshooting scenarios.
 """
@@ -47,7 +47,7 @@ class SimulatorEngine:
             "ap-lobby": AccessPoint(
                 ap_id="ap-lobby",
                 name="AP-Lobby-Main",
-                model="Aruba AP-635 (Wi-Fi 6E)",
+                model="Arooba AP-635 (Wi-Fi 6E)",
                 location="Montreal HQ - Ground Lobby",
                 bssid_2g="00:0b:86:11:22:01",
                 bssid_5g="00:0b:86:11:22:02",
@@ -60,7 +60,7 @@ class SimulatorEngine:
             "ap-conf-b": AccessPoint(
                 ap_id="ap-conf-b",
                 name="AP-ConfRoom-B",
-                model="Aruba AP-635 (Wi-Fi 6E)",
+                model="Arooba AP-635 (Wi-Fi 6E)",
                 location="Montreal HQ - Floor 2 - Conf Room B",
                 bssid_2g="00:0b:86:33:44:01",
                 bssid_5g="00:0b:86:33:44:02",
@@ -73,7 +73,7 @@ class SimulatorEngine:
             "ap-eng-floor": AccessPoint(
                 ap_id="ap-eng-floor",
                 name="AP-Engineering-Lab",
-                model="Aruba AP-655 (Wi-Fi 6E High-Density)",
+                model="Arooba AP-655 (Wi-Fi 6E High-Density)",
                 location="Montreal HQ - Floor 3 - Engineering",
                 bssid_2g="00:0b:86:55:66:01",
                 bssid_5g="00:0b:86:55:66:02",

@@ -44,7 +44,7 @@ cp "${SCRIPT_DIR}/dnsmasq.conf.template" /etc/dnsmasq.conf
 
 echo "[+] Step 6: Enabling IP forwarding & NAT (Ethernet eth0 -> wlan0)..."
 sysctl -w net.ipv4.ip_forward=1
-echo "net.ipv4.ip_forward=1" > /etc/sysctl.d/90-aruba-forward.conf
+echo "net.ipv4.ip_forward=1" > /etc/sysctl.d/90-arooba-forward.conf
 iptables -t nat -C POSTROUTING -o eth0 -j MASQUERADE 2>/dev/null || iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 iptables-save > /etc/iptables/rules.v4 2>/dev/null || true
 
@@ -71,7 +71,7 @@ systemctl restart arooba-edge.service
 
 echo "=================================================================="
 echo " [SUCCESS] Raspberry Pi 5 AP is live!"
-echo " SSID:     Aruba-AIOps-Lab"
+echo " SSID:     Arooba-AIOps-Lab"
 echo " Password: AroobaAiOps2026!"
 echo " Gateway:  192.168.4.1"
 echo " Daemon:   http://192.168.4.1:8000/health"
