@@ -2,7 +2,7 @@
 
 [![Arooba-AIOps CI](https://github.com/fadi/arooba-aiops/actions/workflows/ci.yml/badge.svg)](https://github.com/fadi/arooba-aiops/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue.svg)](https://www.python.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Wi-Fi 6/6E Telemetry](https://img.shields.io/badge/Wi--Fi-802.11ax%20%7C%20802.11v%2Fk-orange.svg)](#)
 
 > **Autonomous Network Operations & Telemetry Agent for Enterprise Wi-Fi.**  
@@ -159,7 +159,7 @@ pytest -v tests/
 ```text
 arooba-aiops/
 ├── README.md                      # Documentation, architecture, and quickstart
-├── LICENSE                        # MIT License
+├── LICENSE                        # Apache 2.0 License
 ├── requirements.txt               # Python dependencies
 ├── .env.example                   # Environment configuration template
 ├── .github/workflows/ci.yml       # GitHub Actions CI matrix
@@ -198,4 +198,4 @@ arooba-aiops/
 
 ## 📜 License
 
-Distributed under the [MIT License](LICENSE).
+Distributed under the [Apache 2.0 License](LICENSE).
