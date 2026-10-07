@@ -90,7 +90,19 @@ pip install -r requirements.txt
 streamlit run ui/dashboard.py
 ```
 
-Open your browser to `http://localhost:8501`. You can immediately:
+The dashboard is configured (`.streamlit/config.toml`) to bind to `0.0.0.0:8501` with CORS/XSRF protection adjusted for external traffic:
+* **Local Machine:** Open `http://localhost:8501`
+* **LAN / Local Wi-Fi Devices:** Open `http://<HOST_IP>:8501` (e.g. `http://192.168.50.120:8501`) from any phone, laptop, or client connected to your home router or the Pi AP.
+* **Public Internet (Remote Access):** Expose securely via:
+  ```bash
+  # Option A: ngrok
+  ngrok http 8501
+
+  # Option B: Cloudflare Tunnel (Zero-config)
+  cloudflared tunnel --url http://localhost:8501
+  ```
+
+You can immediately:
 * Inspect live AP airtime and client link tables.
 * Inject an incident using the sidebar scenario dropdown.
 * Run the AI Agent to watch real-time tool calls, RCA generation, and auto-remediation!

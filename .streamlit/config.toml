@@ -1,0 +1,12 @@
+[server]
+# Bind to all network interfaces so devices on LAN / Wi-Fi can connect
+address = "0.0.0.0"
+port = 8501
+headless = true
+
+# Allow cross-origin websocket connections for external access & reverse proxies
+enableCORS = false
+enableXsrfProtection = false
+
+[browser]
+gatherUsageStats = false
