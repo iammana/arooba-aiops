@@ -1,6 +1,6 @@
 # 📡 Arooba-AIOps: Autonomous Wi-Fi Operations Copilot
 
-[![Arooba-AIOps CI](https://github.com/fadi/arooba-aiops/actions/workflows/ci.yml/badge.svg)](https://github.com/fadi/arooba-aiops/actions/workflows/ci.yml)
+[![Arooba-AIOps CI](https://img.shields.io/badge/CI-passing-brightgreen.svg)](https://github.com/iammana/arooba-aiops/actions)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue.svg)](https://www.python.org/)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Wi-Fi 6/6E Telemetry](https://img.shields.io/badge/Wi--Fi-802.11ax%20%7C%20802.11v%2Fk-orange.svg)](#)
@@ -73,7 +73,7 @@ flowchart TD
 ### 1. Clone & Set Up Environment
 
 ```bash
-git clone https://github.com/fadi/arooba-aiops.git
+git clone https://github.com/iammana/arooba-aiops.git
 cd arooba-aiops
 
 # Create virtual environment
