@@ -95,7 +95,7 @@ with st.sidebar:
         format_func=lambda x: x[1],
     )
 
-    if st.button("Apply Scenario", use_container_width=True, type="secondary"):
+    if st.button("Apply Scenario", width="stretch", type="secondary"):
         msg = simulator.load_scenario(scenario[0])
         st.toast(msg, icon="🔔")
         st.rerun()
@@ -192,7 +192,7 @@ with tab_cockpit:
         })
 
     df = pd.DataFrame(client_data)
-    st.dataframe(df, use_container_width=True, hide_index=True)
+    st.dataframe(df, width="stretch", hide_index=True)
 
 
 with tab_agent:
@@ -213,7 +213,7 @@ with tab_agent:
 
     col_btn1, col_btn2 = st.columns([1, 4])
     with col_btn1:
-        run_btn = st.button("🚀 Run AIOps Agent", type="primary", use_container_width=True)
+        run_btn = st.button("🚀 Run AIOps Agent", type="primary", width="stretch")
 
     if run_btn:
         with st.spinner("Agent is formulating hypotheses and querying telemetry tools..."):
