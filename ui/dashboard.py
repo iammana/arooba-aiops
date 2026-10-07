@@ -4,6 +4,14 @@ Visualizes real-time Wi-Fi AP telemetry, client health,
 interactive scenario injection, and autonomous AI Agent diagnostics.
 """
 
+import sys
+from pathlib import Path
+
+# Ensure project root is in sys.path so simulator, core, and edge can be imported
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 import streamlit as st
 import pandas as pd
 from typing import Dict, Any
