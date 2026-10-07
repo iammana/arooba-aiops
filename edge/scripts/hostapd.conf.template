@@ -3,6 +3,10 @@
 interface=wlan0
 driver=nl80211
 
+# Control interface (Required for hostapd_cli deauthentication and CSA)
+ctrl_interface=/var/run/hostapd
+ctrl_interface_group=0
+
 # Wi-Fi Network Information
 ssid=Arooba-AIOps-Lab
 hw_mode=a
