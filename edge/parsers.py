@@ -8,6 +8,20 @@ import re
 from typing import Dict, List, Optional, Any
 
 
+def _finalize_station(current: Dict[str, Any]) -> None:
+    """Ensures rssi_dbm and signal_avg_dbm fall back to each other if one is available."""
+    if current.get("rssi_dbm") is None and current.get("signal_avg_dbm") is not None:
+        current["rssi_dbm"] = current["signal_avg_dbm"]
+        current["rssi_measured"] = True
+    elif current.get("signal_avg_dbm") is None and current.get("rssi_dbm") is not None:
+        current["signal_avg_dbm"] = current["rssi_dbm"]
+        current["rssi_measured"] = True
+    elif current.get("rssi_dbm") is not None:
+        current["rssi_measured"] = True
+    else:
+        current["rssi_measured"] = False
+
+
 def parse_station_dump(raw_text: str) -> List[Dict[str, Any]]:
     """
     Parses output from: `iw dev wlan0 station dump`
@@ -39,11 +53,13 @@ def parse_station_dump(raw_text: str) -> List[Dict[str, Any]]:
         station_match = re.match(r"^Station\s+([0-9a-fA-F:]{17})", line)
         if station_match:
             if current:
+                _finalize_station(current)
                 stations.append(current)
             current = {
                 "mac": station_match.group(1).lower(),
-                "rssi_dbm": -70,
-                "signal_avg_dbm": -70,
+                "rssi_dbm": None,
+                "signal_avg_dbm": None,
+                "rssi_measured": False,
                 "tx_bitrate_mbps": 0.0,
                 "rx_bitrate_mbps": 0.0,
                 "tx_retries": 0,
@@ -56,12 +72,13 @@ def parse_station_dump(raw_text: str) -> List[Dict[str, Any]]:
         if not current:
             continue
 
-        if line.startswith("signal:"):
-            m = re.search(r"(-?\d+)\s*dBm", line)
+        # Handle 'signal:' with optional MIMO bracketed values: 'signal: -52 [-55, -57] dBm'
+        if re.match(r"^signal\s*:", line, re.IGNORECASE):
+            m = re.search(r"(-?\d+)", line[line.find(":") + 1:])
             if m:
                 current["rssi_dbm"] = int(m.group(1))
-        elif line.startswith("signal avg:"):
-            m = re.search(r"(-?\d+)\s*dBm", line)
+        elif re.match(r"^signal\s+avg\s*:", line, re.IGNORECASE):
+            m = re.search(r"(-?\d+)", line[line.find(":") + 1:])
             if m:
                 current["signal_avg_dbm"] = int(m.group(1))
         elif line.startswith("tx retries:"):
@@ -82,7 +99,58 @@ def parse_station_dump(raw_text: str) -> List[Dict[str, Any]]:
                 current["inactive_time_ms"] = int(m.group(1))
 
     if current:
+        _finalize_station(current)
         stations.append(current)
+
+    return stations
+
+
+def parse_hostapd_all_sta(raw_text: str) -> Dict[str, Dict[str, Any]]:
+    """
+    Parses output from: `hostapd_cli -i <interface> all_sta`
+    Returns a dictionary keyed by MAC address with station metrics like signal,
+    rates, and connection duration.
+    """
+    stations: Dict[str, Dict[str, Any]] = {}
+    current_mac: Optional[str] = None
+    current_data: Dict[str, Any] = {}
+
+    for line in raw_text.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        mac_m = re.match(r"^([0-9a-fA-F:]{17})$", line)
+        if mac_m:
+            if current_mac:
+                stations[current_mac] = current_data
+            current_mac = mac_m.group(1).lower()
+            current_data = {}
+            continue
+        if current_mac and "=" in line:
+            k, v = line.split("=", 1)
+            k = k.strip()
+            v = v.strip()
+            if k == "signal":
+                try:
+                    current_data["signal"] = int(v)
+                except ValueError:
+                    pass
+            elif k in ("rx_rate_info", "tx_rate_info"):
+                try:
+                    # In hostapd_cli, rate_info is given in units of 100 kbps (e.g., 722 = 72.2 Mbps)
+                    current_data[k] = float(v) / 10.0
+                except ValueError:
+                    pass
+            elif k == "connected_time":
+                try:
+                    current_data["connected_time_sec"] = int(v)
+                except ValueError:
+                    pass
+            elif k == "flags":
+                current_data["flags"] = v
+
+    if current_mac:
+        stations[current_mac] = current_data
 
     return stations
 

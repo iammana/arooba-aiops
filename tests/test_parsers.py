@@ -68,6 +68,52 @@ class TestEdgeParsers(unittest.TestCase):
         self.assertEqual(leases["3c:22:fb:44:00:02"]["hostname"], "iPhone-Guest")
         self.assertEqual(leases["70:3a:cb:77:00:03"]["hostname"], "Unknown-Station")
 
+    def test_parse_station_dump_signal_avg_fallback(self):
+        dump = """
+Station 1c:bc:fe:41:70:f0 (on wlan0)
+    inactive time:  120 ms
+    tx bitrate:     72.2 MBit/s
+    signal avg:     -58 dBm
+"""
+        stations = parse_station_dump(dump)
+        self.assertEqual(len(stations), 1)
+        self.assertEqual(stations[0]["rssi_dbm"], -58)
+        self.assertEqual(stations[0]["signal_avg_dbm"], -58)
+        self.assertTrue(stations[0]["rssi_measured"])
+
+    def test_parse_station_dump_bracketed_mimo(self):
+        dump = """
+Station 1c:bc:fe:41:70:f0 (on wlan0)
+    signal:         -52 [-55, -57] dBm
+    tx bitrate:     72.2 MBit/s
+"""
+        stations = parse_station_dump(dump)
+        self.assertEqual(len(stations), 1)
+        self.assertEqual(stations[0]["rssi_dbm"], -52)
+        self.assertTrue(stations[0]["rssi_measured"])
+
+    def test_parse_hostapd_all_sta(self):
+        raw = """
+1c:bc:fe:41:70:f0
+flags=[AUTH][ASSOC][AUTHORIZED][WMM][HT]
+signal=-58
+rx_rate_info=722
+tx_rate_info=722
+connected_time=320
+b0:ab:c1:cb:c7:c7
+flags=[AUTH][ASSOC]
+signal=-79
+tx_rate_info=60
+connected_time=120
+"""
+        from edge.parsers import parse_hostapd_all_sta
+        sta = parse_hostapd_all_sta(raw)
+        self.assertIn("1c:bc:fe:41:70:f0", sta)
+        self.assertEqual(sta["1c:bc:fe:41:70:f0"]["signal"], -58)
+        self.assertEqual(sta["1c:bc:fe:41:70:f0"]["tx_rate_info"], 72.2)
+        self.assertEqual(sta["b0:ab:c1:cb:c7:c7"]["signal"], -79)
+        self.assertEqual(sta["b0:ab:c1:cb:c7:c7"]["tx_rate_info"], 6.0)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -29,7 +29,7 @@ except ImportError:
     class BaseModel:
         pass
 
-from edge.parsers import parse_station_dump, parse_survey_dump, parse_dnsmasq_leases
+from edge.parsers import parse_station_dump, parse_survey_dump, parse_dnsmasq_leases, parse_hostapd_all_sta
 
 app = FastAPI(
     title="Arooba-AIOps Pi5 Edge Telemetry Daemon",
@@ -142,6 +142,10 @@ def get_clients_telemetry():
     raw_stations = run_cmd(["iw", "dev", INTERFACE, "station", "dump"])
     stations = parse_station_dump(raw_stations) if raw_stations else []
 
+    # Query hostapd control socket as a secondary RF telemetry provider
+    raw_hostapd_sta = run_cmd(["hostapd_cli", "-i", INTERFACE, "all_sta"], timeout=1.0)
+    hostapd_stations = parse_hostapd_all_sta(raw_hostapd_sta) if raw_hostapd_sta else {}
+
     leases: Dict[str, Dict[str, str]] = {}
     if os.path.exists(DNSMASQ_LEASES_PATH):
         try:
@@ -154,8 +158,36 @@ def get_clients_telemetry():
     for s in stations:
         mac = s["mac"].lower()
         lease = leases.get(mac, {})
-        snr = s["rssi_dbm"] - (-95)
-        sticky = s["rssi_dbm"] < -75
+        h_sta = hostapd_stations.get(mac, {})
+
+        # Priority 1: Direct driver measurement from iw station dump
+        rssi = s.get("rssi_dbm")
+        if not s.get("rssi_measured", False) or rssi == 0:
+            rssi = None
+
+        # Priority 2: hostapd MIB control socket signal (e.g. signal=-45)
+        if rssi is None and "signal" in h_sta and h_sta["signal"] != 0:
+            rssi = h_sta["signal"]
+
+        # Priority 3: Dynamic link budget estimation based on negotiated 802.11 PHY bitrate.
+        # High MCS rates (e.g. 72.2 Mbps MCS7 on 20MHz) require strong SNR/RSSI (~ -56 to -60 dBm),
+        # while devices dropping to 6.0 Mbps base rate reflect weak signal (~ -78 to -82 dBm).
+        if rssi is None:
+            tx_mbps = s.get("tx_bitrate_mbps", 0.0)
+            if tx_mbps >= 70:
+                rssi = -56
+            elif tx_mbps >= 40:
+                rssi = -64
+            elif tx_mbps >= 15:
+                rssi = -72
+            elif tx_mbps > 0:
+                rssi = -80
+            else:
+                rssi = -75
+
+        noise_floor = -95
+        snr = rssi - noise_floor
+        sticky = rssi < -75
 
         results.append({
             "mac": mac,
@@ -164,7 +196,7 @@ def get_clients_telemetry():
             "bssid": INTERFACE,
             "ap_name": "RaspberryPi-5-Edge-AP",
             "band": "5GHz" if s["tx_bitrate_mbps"] > 100 else "2.4GHz",
-            "rssi_dbm": s["rssi_dbm"],
+            "rssi_dbm": rssi,
             "snr_db": max(0, snr),
             "tx_bitrate_mbps": s["tx_bitrate_mbps"],
             "rx_bitrate_mbps": s["rx_bitrate_mbps"],
