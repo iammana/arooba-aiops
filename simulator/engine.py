@@ -76,7 +76,7 @@ class SimulatorEngine:
                 channel_utilization_pct=18.5,
                 noise_floor_dbm=-96,
                 connected_clients=["a4:83:e7:10:00:01", "3c:22:fb:44:00:02"],
-                pos_x=25.0,
+                pos_x=18.0,
                 pos_y=75.0,
             ),
             "ap-conf-b": AccessPoint(
@@ -92,7 +92,7 @@ class SimulatorEngine:
                 noise_floor_dbm=-95,
                 connected_clients=["f8:ff:c2:55:00:03"],
                 pos_x=50.0,
-                pos_y=30.0,
+                pos_y=22.0,
             ),
             "ap-eng-floor": AccessPoint(
                 ap_id="ap-eng-floor",
@@ -107,7 +107,7 @@ class SimulatorEngine:
                 noise_floor_dbm=-94,
                 connected_clients=["70:3a:cb:77:00:04", "88:66:5a:88:00:05"],
                 pos_x=80.0,
-                pos_y=75.0,
+                pos_y=55.0,
             ),
         }
 
@@ -125,8 +125,8 @@ class SimulatorEngine:
                 rx_bitrate_mbps=866.7,
                 tx_retries_pct=1.0,
                 connection_state=ConnectionState.CONNECTED,
-                pos_x=23.0,
-                pos_y=70.0,
+                pos_x=10.0,
+                pos_y=85.0,
             ),
             "3c:22:fb:44:00:02": ClientStation(
                 mac="3c:22:fb:44:00:02",
@@ -141,8 +141,8 @@ class SimulatorEngine:
                 rx_bitrate_mbps=540.0,
                 tx_retries_pct=2.1,
                 connection_state=ConnectionState.CONNECTED,
-                pos_x=28.0,
-                pos_y=78.0,
+                pos_x=26.0,
+                pos_y=85.0,
             ),
             "f8:ff:c2:55:00:03": ClientStation(
                 mac="f8:ff:c2:55:00:03",
@@ -157,8 +157,8 @@ class SimulatorEngine:
                 rx_bitrate_mbps=1201.0,
                 tx_retries_pct=0.8,
                 connection_state=ConnectionState.CONNECTED,
-                pos_x=52.0,
-                pos_y=28.0,
+                pos_x=40.0,
+                pos_y=35.0,
             ),
             "70:3a:cb:77:00:04": ClientStation(
                 mac="70:3a:cb:77:00:04",
@@ -173,8 +173,8 @@ class SimulatorEngine:
                 rx_bitrate_mbps=866.7,
                 tx_retries_pct=1.4,
                 connection_state=ConnectionState.CONNECTED,
-                pos_x=78.0,
-                pos_y=72.0,
+                pos_x=73.0,
+                pos_y=35.0,
             ),
             "88:66:5a:88:00:05": ClientStation(
                 mac="88:66:5a:88:00:05",
@@ -189,8 +189,8 @@ class SimulatorEngine:
                 rx_bitrate_mbps=720.0,
                 tx_retries_pct=1.9,
                 connection_state=ConnectionState.CONNECTED,
-                pos_x=83.0,
-                pos_y=79.0,
+                pos_x=85.0,
+                pos_y=75.0,
             ),
         }
 
@@ -265,8 +265,8 @@ class SimulatorEngine:
             connection_state=ConnectionState.CONNECTED,
             sticky_client_detected=True,
             last_event="ROAM_TIMEOUT: User walked past AP-ConfRoom-B (-46 dBm) without 802.11k/v trigger",
-            pos_x=52.0,                 # Physically located in Conf Room B
-            pos_y=28.0,
+            pos_x=40.0,                 # Physically located in Conf Room B
+            pos_y=35.0,
         )
         if troubled_mac in self.aps["ap-conf-b"].connected_clients:
             self.aps["ap-conf-b"].connected_clients.remove(troubled_mac)
