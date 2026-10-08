@@ -161,7 +161,7 @@ with st.sidebar:
     st.subheader("⏱️ Live Telemetry Stream")
     auto_refresh = st.toggle(
         "Auto-Refresh Live Stream",
-        value=True,
+        value=False,
         help="Continuously poll live RF and client telemetry from the edge AP in the background.",
     )
     poll_seconds = 3
