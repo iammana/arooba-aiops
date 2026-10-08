@@ -24,6 +24,7 @@ from core.tools import (
     remediate_adjust_tx_power,
     remediate_resolve_dhcp_pool,
 )
+from core.telemetry_client import telemetry_client
 
 
 class DeterministicAIOpsAgent:
@@ -215,6 +216,33 @@ Severe **Co-Channel Interference (CCI)** and non-802.11 RF noise on 2.4 GHz Chan
 - **Result:** Issued dynamic Channel Switch Announcement (CSA) to Channel {target_chan}.
 - **Verification:** Airtime utilization dropped from 91.4% to `21.5%`. Noise floor returned to nominal -95 dBm.
 """
+
+        elif len(aps) == 0 and telemetry_client.get_mode() == "hardware":
+            final_report = f"""### ⚠️ Physical Edge Connection Alert
+- **Evaluation Status:** Physical Edge Node Unreachable.
+- **Target Host:** `{telemetry_client.get_edge_host()}`
+- **Diagnostic Error:** `{telemetry_client.last_error or 'Connection refused / host unreachable'}`
+
+### 🔍 Telemetry Evidence Collected
+- **Access Points Surveyed:** 0 (Failed to reach Raspberry Pi 5 AP daemon).
+- **Connected Stations:** 0
+
+### 🎯 Root Cause Analysis (RCA)
+The Arooba-AIOps Agent could not establish a connection to the Edge Telemetry Daemon on the Raspberry Pi 5. The edge device may be powered off, the daemon may not be running (`arooba-edge.service`), or the workstation is not connected to the `Arooba-AIOps-Lab` Wi-Fi network / LAN.
+
+### ⚡ Remediation Recommendation
+1. Verify the Pi 5 is powered on and running the Edge Daemon.
+2. If connecting directly over Wi-Fi, join SSID `Arooba-AIOps-Lab` (password: `AroobaAiOps2026!`).
+3. If connecting over LAN, update the Edge AP Host URL in the sidebar to the Pi's LAN IP address.
+4. On the Pi, check service status: `sudo systemctl status arooba-edge`.
+"""
+            return {
+                "success": False,
+                "provider": "Arooba-AIOps Diagnostic Orchestrator",
+                "trace": trace,
+                "final_report": final_report,
+                "remediation": None,
+            }
 
         else:
             final_report = f"""### 📋 Incident Summary
