@@ -25,9 +25,12 @@ class TestTelemetryClient(unittest.TestCase):
         self.client.set_edge_host("http://192.168.1.150:8000/")
         self.assertEqual(self.client.get_edge_host(), "http://192.168.1.150:8000")
 
-    def test_hardware_mode_unreachable_returns_empty_and_offline(self):
+    @patch("core.telemetry_client.TelemetryClient._http_get")
+    def test_hardware_mode_unreachable_returns_empty_and_offline(self, mock_http_get):
+        mock_http_get.return_value = None
         self.client.set_mode("hardware")
         self.client.set_edge_host("http://127.0.0.1:59999")  # Unused port
+        self.client.last_error = "Connection refused / unreachable host at http://127.0.0.1:59999/health"
 
         health = self.client.check_edge_health(timeout=0.2, force=True)
         self.assertFalse(health["connected"])
@@ -126,7 +129,9 @@ class TestTelemetryClient(unittest.TestCase):
         self.assertTrue(services.eth0_carrier)
         self.assertEqual(services.conntrack_sessions, 25)
 
-    def test_agent_investigation_in_offline_hardware_mode(self):
+    @patch("core.telemetry_client.TelemetryClient._http_get")
+    def test_agent_investigation_in_offline_hardware_mode(self, mock_http_get):
+        mock_http_get.return_value = None
         from core.telemetry_client import telemetry_client
         original_mode = telemetry_client.get_mode()
         original_host = telemetry_client.get_edge_host()
@@ -134,6 +139,7 @@ class TestTelemetryClient(unittest.TestCase):
         try:
             telemetry_client.set_mode("hardware")
             telemetry_client.set_edge_host("http://127.0.0.1:59999")
+            telemetry_client.last_error = "Connection refused / host unreachable"
             telemetry_client.check_edge_health(timeout=0.1, force=True)
 
             res = aiops_agent.run_investigation("Check network health", provider_override="mock")
@@ -143,6 +149,9 @@ class TestTelemetryClient(unittest.TestCase):
         finally:
             telemetry_client.set_mode(original_mode)
             telemetry_client.set_edge_host(original_host)
+            telemetry_client.last_error = None
+            telemetry_client._health_cache = None
+            telemetry_client._health_cache_time = 0.0
 
 
 if __name__ == "__main__":
