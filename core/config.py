@@ -14,7 +14,7 @@ except ImportError:
 
 class Config:
     TELEMETRY_SOURCE: str = os.getenv("TELEMETRY_SOURCE", "simulated").lower()
-    EDGE_AP_HOST: str = os.getenv("EDGE_AP_HOST", "http://192.168.4.1:8000")
+    EDGE_AP_HOST: str = os.getenv("EDGE_AP_HOST", "http://192.168.50.128:8000")
     EDGE_AP_TIMEOUT_SEC: float = float(os.getenv("EDGE_AP_TIMEOUT_SEC", "5.0"))
 
     LLM_PROVIDER: str = os.getenv("LLM_PROVIDER", "mock").lower()

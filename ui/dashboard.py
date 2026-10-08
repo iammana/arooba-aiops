@@ -81,7 +81,7 @@ with st.sidebar:
         edge_host_input = st.text_input(
             "Edge AP Host URL",
             value=telemetry_client.get_edge_host(),
-            help="Edge Daemon REST URL. Default: http://192.168.4.1:8000 when connected to Pi AP, or http://<PI_LAN_IP>:8000 on LAN.",
+            help="Edge Daemon REST URL. Default: http://192.168.50.128:8000 (or http://192.168.4.1:8000 when connected directly to Pi AP).",
         )
         if edge_host_input.strip() and edge_host_input.strip() != telemetry_client.get_edge_host():
             telemetry_client.set_edge_host(edge_host_input.strip())

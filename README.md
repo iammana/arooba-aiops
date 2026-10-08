@@ -149,7 +149,7 @@ This automated script will:
 In `ui/dashboard.py` (or your `.env` file), switch the source mode to **Physical Edge (Raspberry Pi 5)**:
 ```env
 TELEMETRY_SOURCE=hardware
-EDGE_AP_HOST=http://192.168.4.1:8000
+EDGE_AP_HOST=http://192.168.50.128:8000
 ```
 
 Now, connect your smartphone or laptop to `Arooba-AIOps-Lab`. The AI Agent will read your phone's real RSSI, SNR, and PHY bitrate directly from the Pi 5's Broadcom wireless driver!
