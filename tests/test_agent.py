@@ -12,7 +12,7 @@ class TestAgent(unittest.TestCase):
     def test_agent_sticky_client_investigation(self):
         simulator.load_scenario("sticky_client")
         query = "User on f8:ff:c2:55:00:03 is having severe Zoom drops in Conference Room B."
-        result = aiops_agent.run_investigation(query)
+        result = aiops_agent.run_investigation(query, provider_override="mock")
 
         self.assertTrue(result["success"])
         self.assertGreaterEqual(len(result["trace"]), 4)
@@ -24,7 +24,7 @@ class TestAgent(unittest.TestCase):
     def test_agent_channel_congestion_investigation(self):
         simulator.load_scenario("channel_congestion")
         query = "AP-ConfRoom-B is reporting sluggish throughput and high airtime utilization."
-        result = aiops_agent.run_investigation(query)
+        result = aiops_agent.run_investigation(query, provider_override="mock")
 
         self.assertTrue(result["success"])
         self.assertIn("Root Cause Analysis (RCA)", result["final_report"])
@@ -35,7 +35,7 @@ class TestAgent(unittest.TestCase):
     def test_agent_dhcp_exhaustion_investigation(self):
         simulator.load_scenario("dhcp_exhaustion")
         query = "Clients cannot get an IP address on the guest VLAN."
-        result = aiops_agent.run_investigation(query)
+        result = aiops_agent.run_investigation(query, provider_override="mock")
 
         self.assertTrue(result["success"])
         self.assertIn("Root Cause Analysis (RCA)", result["final_report"])

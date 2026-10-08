@@ -335,7 +335,7 @@ class AIOpsAgent:
 
         # Google Gemini Autonomous Agent
         if provider == "gemini":
-            active_key = api_key_override or config.GEMINI_API_KEY
+            active_key = api_key_override if api_key_override is not None else config.GEMINI_API_KEY
             if active_key:
                 try:
                     return self._run_gemini(
@@ -343,7 +343,13 @@ class AIOpsAgent:
                     )
                 except Exception as e:
                     res = self.deterministic_engine.investigate(query)
-                    res["provider"] += f" (Fallback from Gemini error: {e})"
+                    err_str = str(e)
+                    if "429" in err_str or "Quota exceeded" in err_str:
+                        res["provider"] += " (Fallback: Gemini Free-Tier Rate Limit reached [5 RPM]. Retry in a few seconds or upgrade quota.)"
+                    elif "404" in err_str and "not found" in err_str:
+                        res["provider"] += f" (Fallback: Gemini model not available for this key: {err_str})"
+                    else:
+                        res["provider"] += f" (Fallback from Gemini error: {err_str})"
                     return res
             else:
                 res = self.deterministic_engine.investigate(query)
@@ -352,7 +358,7 @@ class AIOpsAgent:
 
         # OpenAI Tool Calling Agent
         elif provider == "openai":
-            active_key = api_key_override or config.OPENAI_API_KEY
+            active_key = api_key_override if api_key_override is not None else config.OPENAI_API_KEY
             if active_key:
                 try:
                     return self._run_openai(
@@ -394,14 +400,24 @@ class AIOpsAgent:
         import functools
         import google.generativeai as genai
 
-        active_key = api_key or config.GEMINI_API_KEY
+        active_key = api_key if api_key is not None else config.GEMINI_API_KEY
         if not active_key:
             raise ValueError("GEMINI_API_KEY is missing or empty.")
 
         genai.configure(api_key=active_key)
 
-        model_name = model or config.GEMINI_MODEL or "gemini-1.5-flash"
-        target_model = model_name.split("/")[-1] if "/" in model_name else model_name
+        model_name = model or config.GEMINI_MODEL or "gemini-3.8-flash"
+        raw_model = model_name.split("/")[-1] if "/" in model_name else model_name
+
+        # Map legacy/retired model names to active equivalents to avoid 404s
+        MODEL_ALIASES = {
+            "gemini-1.5-flash": "gemini-3.8-flash",
+            "gemini-1.5-pro": "gemini-3.1-pro-preview",
+            "gemini-2.0-flash": "gemini-3.8-flash",
+            "gemini-2.5-flash": "gemini-3.8-flash",
+            "gemini-2.5-pro": "gemini-3.1-pro-preview",
+        }
+        target_model = MODEL_ALIASES.get(raw_model, raw_model)
 
         trace: List[Dict[str, Any]] = []
         remediation_performed: Optional[Dict[str, Any]] = None

@@ -136,7 +136,7 @@ class TestTelemetryClient(unittest.TestCase):
             telemetry_client.set_edge_host("http://127.0.0.1:59999")
             telemetry_client.check_edge_health(timeout=0.1, force=True)
 
-            res = aiops_agent.run_investigation("Check network health")
+            res = aiops_agent.run_investigation("Check network health", provider_override="mock")
             self.assertFalse(res["success"])
             self.assertIn("Physical Edge Connection Alert", res["final_report"])
             self.assertIn("Raspberry Pi 5", res["final_report"])

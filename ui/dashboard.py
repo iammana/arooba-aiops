@@ -430,7 +430,7 @@ with tab_agent:
         
         use_gemini = "Gemini" in provider_mode
         gemini_key_input = config.GEMINI_API_KEY
-        gemini_model_input = config.GEMINI_MODEL or "gemini-1.5-flash"
+        gemini_model_input = config.GEMINI_MODEL or "gemini-3.8-flash"
 
         with col_prov2:
             if use_gemini:
@@ -446,9 +446,9 @@ with tab_agent:
                 with col_k2:
                     gemini_model_input = st.selectbox(
                         "Gemini Model",
-                        options=["gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.0-flash"],
+                        options=["gemini-3.8-flash", "gemini-flash-latest", "gemini-3.5-flash", "gemini-3.1-pro-preview"],
                         index=0,
-                        help="gemini-1.5-flash provides ultra-low latency for tool-calling loops.",
+                        help="gemini-3.8-flash provides fast, high-accuracy tool calling.",
                     )
             else:
                 st.info("💡 Expert rule engine runs locally with zero external network requests or API costs.")
