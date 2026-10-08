@@ -154,6 +154,17 @@ EDGE_AP_HOST=http://192.168.4.1:8000
 
 Now, connect your smartphone or laptop to `Arooba-AIOps-Lab`. The AI Agent will read your phone's real RSSI, SNR, and PHY bitrate directly from the Pi 5's Broadcom wireless driver!
 
+### 3. Switch Back to Client Mode (Home Wi-Fi)
+
+To revert AP mode on your Pi 5 so it reconnects to your home router:
+```bash
+sudo bash edge/scripts/switch_to_client.sh
+```
+Then connect to your home Wi-Fi:
+```bash
+sudo nmcli dev wifi connect "YOUR_SSID" password "YOUR_PASSWORD"
+```
+
 ---
 
 ## 🧪 Testing
