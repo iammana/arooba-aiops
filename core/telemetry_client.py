@@ -146,7 +146,7 @@ class TelemetryClient:
 
     def get_all_aps(self) -> List[AccessPoint]:
         if self.mode == "hardware":
-            data = self._http_get("/api/v1/telemetry/ap", timeout=2.0)
+            data = self._http_get("/api/v1/telemetry/ap")
             if data and isinstance(data, dict):
                 return [
                     AccessPoint(
@@ -174,7 +174,7 @@ class TelemetryClient:
 
     def get_all_clients(self) -> List[ClientStation]:
         if self.mode == "hardware":
-            raw_list = self._http_get("/api/v1/telemetry/clients", timeout=2.0)
+            raw_list = self._http_get("/api/v1/telemetry/clients")
             if raw_list and isinstance(raw_list, list):
                 results = []
                 for item in raw_list:
@@ -211,7 +211,7 @@ class TelemetryClient:
 
     def get_network_services(self) -> NetworkServicesStatus:
         if self.mode == "hardware":
-            data = self._http_get("/api/v1/telemetry/services", timeout=2.0)
+            data = self._http_get("/api/v1/telemetry/services")
             if data and isinstance(data, dict):
                 return NetworkServicesStatus(
                     dhcp_pool_total=data.get("dhcp_pool_total", 191),

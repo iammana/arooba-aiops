@@ -55,7 +55,7 @@ class TxPowerRequest(BaseModel):
     tx_power_dbm: int = 15
 
 
-def run_cmd(cmd: List[str]) -> str:
+def run_cmd(cmd: List[str], timeout: float = 2.0) -> str:
     """Executes a local command safely, returning stdout."""
     try:
         proc = subprocess.run(
@@ -64,7 +64,7 @@ def run_cmd(cmd: List[str]) -> str:
             stderr=subprocess.PIPE,
             text=True,
             check=False,
-            timeout=3,
+            timeout=timeout,
         )
         return proc.stdout
     except Exception:
@@ -89,24 +89,40 @@ def health_check():
 @app.get("/api/v1/telemetry/ap")
 def get_ap_telemetry():
     """Returns Access Point radio status, channel, utilization, and noise."""
-    raw_survey = run_cmd(["iw", "dev", INTERFACE, "survey", "dump"])
+    channel = 36
+
+    # 1. Try hostapd_cli status first (instantaneous control socket)
+    raw_status = run_cmd(["hostapd_cli", "-i", INTERFACE, "status"], timeout=1.0)
+    if raw_status:
+        for line in raw_status.splitlines():
+            if line.startswith("channel="):
+                try:
+                    channel = int(line.split("=")[1].strip())
+                    break
+                except ValueError:
+                    pass
+
+    # 2. Fallback to iw info if hostapd_cli was unavailable
+    if channel == 36 and not raw_status:
+        raw_info = run_cmd(["iw", "dev", INTERFACE, "info"], timeout=1.0)
+        if "channel" in raw_info:
+            for line in raw_info.splitlines():
+                if "channel" in line:
+                    parts = line.split()
+                    try:
+                        idx = parts.index("channel")
+                        channel = int(parts[idx + 1])
+                        break
+                    except (ValueError, IndexError):
+                        pass
+
+    # 3. Query survey dump with a short 1.0s timeout to prevent blocking REST response
+    raw_survey = run_cmd(["iw", "dev", INTERFACE, "survey", "dump"], timeout=1.0)
     survey = parse_survey_dump(raw_survey) if raw_survey else {
-        "frequency_mhz": 5180,
+        "frequency_mhz": 5180 if channel > 14 else 2412,
         "noise_floor_dbm": -95,
         "channel_utilization_pct": 14.2,
     }
-
-    raw_info = run_cmd(["iw", "dev", INTERFACE, "info"])
-    channel = 36
-    if "channel" in raw_info:
-        for line in raw_info.splitlines():
-            if "channel" in line:
-                parts = line.split()
-                try:
-                    idx = parts.index("channel")
-                    channel = int(parts[idx + 1])
-                except (ValueError, IndexError):
-                    pass
 
     return {
         "ap_id": "pi5-edge-ap",

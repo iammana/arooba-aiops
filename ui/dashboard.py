@@ -156,6 +156,24 @@ with st.sidebar:
             st.rerun()
 
     st.divider()
+
+    # Live Telemetry Stream Polling Controls
+    st.subheader("⏱️ Live Telemetry Stream")
+    auto_refresh = st.toggle(
+        "Auto-Refresh Live Stream",
+        value=True,
+        help="Continuously poll live RF and client telemetry from the edge AP in the background.",
+    )
+    poll_seconds = 3
+    if auto_refresh:
+        poll_seconds = st.selectbox(
+            "Polling Interval",
+            options=[2, 3, 5, 10],
+            index=1,
+            format_func=lambda s: f"{s} seconds",
+        )
+
+    st.divider()
     st.caption("Arooba Autonomous Network Operations Engine")
 
 
@@ -167,123 +185,146 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Fetch Current Telemetry
 is_hardware = current_mode == "hardware"
-is_connected = True
-if is_hardware:
-    health = telemetry_client.check_edge_health()
-    is_connected = health.get("connected", False)
-
-aps = telemetry_client.get_all_aps()
-clients = telemetry_client.get_all_clients()
-services = telemetry_client.get_network_services()
-
-if is_hardware and not is_connected:
-    st.warning(
-        f"⚠️ **Raspberry Pi 5 Edge AP is unreachable at `{telemetry_client.get_edge_host()}`.** "
-        "Showing disconnected state. Check sidebar settings to verify the Pi 5 Edge URL, ensure `arooba-edge` is running, "
-        "or switch to **Simulated Campus** mode."
-    )
-
-# Top Stats Overview
-col1, col2, col3, col4 = st.columns(4)
-with col1:
-    if is_hardware and not is_connected:
-        st.metric("Managed APs", 0, delta="Edge Offline", delta_color="inverse")
-    else:
-        st.metric("Managed APs", len(aps), delta="All Online" if len(aps) > 0 else "None")
-with col2:
-    st.metric("Connected Stations", len(clients))
-with col3:
-    if aps:
-        avg_util = round(sum(ap.channel_utilization_pct for ap in aps) / max(1, len(aps)), 1)
-        st.metric(
-            "Avg Channel Utilization",
-            f"{avg_util}%",
-            delta="-Congested" if avg_util > 50 else "+Optimal",
-            delta_color="inverse" if avg_util > 50 else "normal",
-        )
-    else:
-        st.metric("Avg Channel Utilization", "N/A")
-with col4:
-    if is_hardware and not is_connected:
-        st.metric("DHCP Pool Usage", "N/A")
-    elif services.dhcp_pool_total > 0:
-        dhcp_pct = round((services.dhcp_pool_used / services.dhcp_pool_total) * 100, 1)
-        st.metric(
-            "DHCP Pool Usage",
-            f"{dhcp_pct}%",
-            delta="Exhausted" if services.dhcp_exhausted else "Healthy",
-            delta_color="inverse" if services.dhcp_exhausted else "normal",
-        )
-    else:
-        st.metric("DHCP Pool Usage", "N/A")
-
-st.divider()
 
 # ================= Tabs: Telemetry Cockpit vs Agent Console =================
 tab_cockpit, tab_agent = st.tabs(["📊 Live Telemetry Cockpit", "🤖 Autonomous AI Copilot Console"])
 
 with tab_cockpit:
-    st.subheader("Managed Access Point Radios")
-    if not aps:
+    @st.fragment(run_every=poll_seconds if auto_refresh else None)
+    def render_live_telemetry_cockpit():
+        import datetime
+        now_str = datetime.datetime.now().strftime("%H:%M:%S")
+
+        # Fetch Current Telemetry
+        is_connected = True
         if is_hardware:
-            st.info("📡 No Access Point telemetry received. Verify that the Raspberry Pi 5 Edge Daemon is reachable.")
-        else:
-            st.info("No Access Points configured.")
-    else:
-        ap_cols = st.columns(len(aps))
-        for idx, ap in enumerate(aps):
-            with ap_cols[idx]:
-                is_congested = ap.channel_utilization_pct > 70.0
-                border_color = "🔴" if is_congested else "🟢"
-                st.markdown(f"#### {border_color} {ap.name}")
-                st.caption(f"**Model:** {ap.model}")
-                st.caption(f"**Location:** {ap.location}")
+            health = telemetry_client.check_edge_health()
+            is_connected = health.get("connected", False)
+
+        aps = telemetry_client.get_all_aps()
+        clients = telemetry_client.get_all_clients()
+        services = telemetry_client.get_network_services()
+
+        # Live Status Banner & Manual Refresh
+        bar_col1, bar_col2 = st.columns([3, 1])
+        with bar_col1:
+            if auto_refresh:
+                st.caption(f"🟢 **Live Telemetry Stream Active** (Auto-polling every {poll_seconds}s) • Last updated: `{now_str}`")
+            else:
+                st.caption(f"⏸️ **Live Stream Paused** • Last updated: `{now_str}`")
+        with bar_col2:
+            if st.button("🔄 Refresh Data", key="refresh_cockpit_btn", width="stretch"):
+                st.rerun(scope="fragment")
+
+        if is_hardware and not is_connected:
+            st.warning(
+                f"⚠️ **Raspberry Pi 5 Edge AP is unreachable at `{telemetry_client.get_edge_host()}`.** "
+                "Showing disconnected state. Check sidebar settings to verify the Pi 5 Edge URL, ensure `arooba-edge` is running, "
+                "or switch to **Simulated Campus** mode."
+            )
+
+        # Top Stats Overview
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            if is_hardware and not is_connected:
+                st.metric("Managed APs", 0, delta="Edge Offline", delta_color="inverse")
+            else:
+                st.metric("Managed APs", len(aps), delta="All Online" if len(aps) > 0 else "None")
+        with col2:
+            st.metric("Connected Stations", len(clients))
+        with col3:
+            if aps:
+                avg_util = round(sum(ap.channel_utilization_pct for ap in aps) / max(1, len(aps)), 1)
                 st.metric(
-                    "Airtime Utilization",
-                    f"{ap.channel_utilization_pct}%",
-                    delta="Severe Interference" if is_congested else "Clean Airtime",
-                    delta_color="inverse" if is_congested else "normal",
+                    "Avg Channel Utilization",
+                    f"{avg_util}%",
+                    delta="-Congested" if avg_util > 50 else "+Optimal",
+                    delta_color="inverse" if avg_util > 50 else "normal",
                 )
-                st.write(f"- **2.4 GHz:** Channel {ap.channel_2g} ({ap.tx_power_2g_dbm} dBm)")
-                st.write(f"- **5 GHz:** Channel {ap.channel_5g} ({ap.tx_power_5g_dbm} dBm)")
-                st.write(f"- **Noise Floor:** `{ap.noise_floor_dbm} dBm`")
-                st.write(f"- **Clients Associated:** `{len(ap.connected_clients)}`")
+            else:
+                st.metric("Avg Channel Utilization", "N/A")
+        with col4:
+            if is_hardware and not is_connected:
+                st.metric("DHCP Pool Usage", "N/A")
+            elif services.dhcp_pool_total > 0:
+                dhcp_pct = round((services.dhcp_pool_used / services.dhcp_pool_total) * 100, 1)
+                st.metric(
+                    "DHCP Pool Usage",
+                    f"{dhcp_pct}%",
+                    delta="Exhausted" if services.dhcp_exhausted else "Healthy",
+                    delta_color="inverse" if services.dhcp_exhausted else "normal",
+                )
+            else:
+                st.metric("DHCP Pool Usage", "N/A")
 
-    st.divider()
+        st.divider()
 
-    st.subheader("Connected Client Stations & RF Link Quality")
-    if not clients:
-        if is_hardware:
-            st.info("No client stations currently associated with the Pi 5 AP (`wlan0`). Connect a smartphone or laptop to **`Arooba-AIOps-Lab`** to observe real RF telemetry.")
+        st.subheader("Managed Access Point Radios")
+        if not aps:
+            if is_hardware:
+                if is_connected:
+                    err_detail = f" (Error: `{telemetry_client.last_error}`)" if telemetry_client.last_error else ""
+                    st.info(f"📡 No Access Point radio metrics received{err_detail}. Connected client stations and DHCP services are active below.")
+                else:
+                    st.info("📡 No Access Point telemetry received. Verify that the Raspberry Pi 5 Edge Daemon is reachable.")
+            else:
+                st.info("No Access Points configured.")
         else:
-            st.info("No connected client stations.")
-    else:
-        client_data = []
-        for c in clients:
-            status_emoji = "🟢"
-            if c.connection_state.value == "DHCP_FAILED":
-                status_emoji = "🔴 (DHCP Failure)"
-            elif c.sticky_client_detected or c.rssi_dbm < -75:
-                status_emoji = "⚠️ (Sticky / Weak Link)"
+            ap_cols = st.columns(len(aps))
+            for idx, ap in enumerate(aps):
+                with ap_cols[idx]:
+                    is_congested = ap.channel_utilization_pct > 70.0
+                    border_color = "🔴" if is_congested else "🟢"
+                    st.markdown(f"#### {border_color} {ap.name}")
+                    st.caption(f"**Model:** {ap.model}")
+                    st.caption(f"**Location:** {ap.location}")
+                    st.metric(
+                        "Airtime Utilization",
+                        f"{ap.channel_utilization_pct}%",
+                        delta="Severe Interference" if is_congested else "Clean Airtime",
+                        delta_color="inverse" if is_congested else "normal",
+                    )
+                    st.write(f"- **2.4 GHz:** Channel {ap.channel_2g} ({ap.tx_power_2g_dbm} dBm)")
+                    st.write(f"- **5 GHz:** Channel {ap.channel_5g} ({ap.tx_power_5g_dbm} dBm)")
+                    st.write(f"- **Noise Floor:** `{ap.noise_floor_dbm} dBm`")
+                    st.write(f"- **Clients Associated:** `{len(ap.connected_clients)}`")
 
-            client_data.append({
-                "Status": status_emoji,
-                "Hostname": c.hostname,
-                "MAC Address": c.mac,
-                "IP Address": c.ip or "0.0.0.0",
-                "Associated AP": c.ap_name,
-                "Band": c.band,
-                "RSSI (dBm)": c.rssi_dbm,
-                "SNR (dB)": c.snr_db,
-                "PHY Tx (Mbps)": c.tx_bitrate_mbps,
-                "Tx Retries (%)": f"{c.tx_retries_pct}%",
-                "Last Event": c.last_event,
-            })
+        st.divider()
 
-        df = pd.DataFrame(client_data)
-        st.dataframe(df, width="stretch", hide_index=True)
+        st.subheader("Connected Client Stations & RF Link Quality")
+        if not clients:
+            if is_hardware:
+                st.info("No client stations currently associated with the Pi 5 AP (`wlan0`). Connect a smartphone or laptop to **`Arooba-AIOps-Lab`** to observe real RF telemetry.")
+            else:
+                st.info("No connected client stations.")
+        else:
+            client_data = []
+            for c in clients:
+                status_emoji = "🟢"
+                if c.connection_state.value == "DHCP_FAILED":
+                    status_emoji = "🔴 (DHCP Failure)"
+                elif c.sticky_client_detected or c.rssi_dbm < -75:
+                    status_emoji = "⚠️ (Sticky / Weak Link)"
+
+                client_data.append({
+                    "Status": status_emoji,
+                    "Hostname": c.hostname,
+                    "MAC Address": c.mac,
+                    "IP Address": c.ip or "0.0.0.0",
+                    "Associated AP": c.ap_name,
+                    "Band": c.band,
+                    "RSSI (dBm)": c.rssi_dbm,
+                    "SNR (dB)": c.snr_db,
+                    "PHY Tx (Mbps)": c.tx_bitrate_mbps,
+                    "Tx Retries (%)": f"{c.tx_retries_pct}%",
+                    "Last Event": c.last_event,
+                })
+
+            df = pd.DataFrame(client_data)
+            st.dataframe(df, width="stretch", hide_index=True)
+
+    render_live_telemetry_cockpit()
 
 
 with tab_agent:
@@ -293,10 +334,11 @@ with tab_agent:
         "reconstruct the client journey, diagnose the root cause, and execute autonomous remediation."
     )
 
+    agent_clients = telemetry_client.get_all_clients()
     # Prompt suggestions based on mode and scenario
     if is_hardware:
-        if clients:
-            first_mac = clients[0].mac
+        if agent_clients:
+            first_mac = agent_clients[0].mac
             default_prompt = f"Analyze RF link quality, signal strength (RSSI), and frame retry rates for station {first_mac} on RaspberryPi-5-Edge-AP."
         else:
             default_prompt = "Perform an RF health check and survey airtime utilization on RaspberryPi-5-Edge-AP."
