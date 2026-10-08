@@ -406,16 +406,18 @@ class AIOpsAgent:
 
         genai.configure(api_key=active_key)
 
-        model_name = model or config.GEMINI_MODEL or "gemini-3.8-flash"
+        model_name = model or config.GEMINI_MODEL or "gemini-3.1-flash-lite"
         raw_model = model_name.split("/")[-1] if "/" in model_name else model_name
 
         # Map legacy/retired model names to active equivalents to avoid 404s
         MODEL_ALIASES = {
-            "gemini-1.5-flash": "gemini-3.8-flash",
+            "gemini-1.5-flash": "gemini-3.1-flash-lite",
             "gemini-1.5-pro": "gemini-3.1-pro-preview",
-            "gemini-2.0-flash": "gemini-3.8-flash",
-            "gemini-2.5-flash": "gemini-3.8-flash",
+            "gemini-2.0-flash": "gemini-3.1-flash-lite",
+            "gemini-2.5-flash": "gemini-3.1-flash-lite",
             "gemini-2.5-pro": "gemini-3.1-pro-preview",
+            "flash-lite": "gemini-3.1-flash-lite",
+            "gemini-flash-lite": "gemini-3.1-flash-lite",
         }
         target_model = MODEL_ALIASES.get(raw_model, raw_model)
 
