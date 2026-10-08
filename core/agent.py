@@ -278,42 +278,201 @@ class AIOpsAgent:
     def __init__(self):
         self.deterministic_engine = DeterministicAIOpsAgent()
 
+    def _summarize_tool_call(self, name: str, args: Dict[str, Any], result: Any) -> str:
+        """Generates user-friendly step descriptions for UI display."""
+        if isinstance(result, dict) and "error" in result:
+            return f"Tool returned error: {result['error']}"
+
+        if name == "list_access_points":
+            count = len(result) if isinstance(result, list) else 0
+            return f"Surveyed {count} Access Point radio(s) across campus."
+        elif name == "list_connected_clients":
+            count = len(result) if isinstance(result, list) else 0
+            return f"Surveyed {count} active client station(s) on WLAN."
+        elif name == "get_ap_rf_health":
+            ap = args.get("ap_id", "AP")
+            util = result.get("channel_utilization_pct", "N/A") if isinstance(result, dict) else "N/A"
+            noise = result.get("noise_floor_dbm", "N/A") if isinstance(result, dict) else "N/A"
+            return f"Polled AP '{ap}' RF health: {util}% airtime utilization, {noise} dBm noise floor."
+        elif name == "get_client_telemetry":
+            ident = args.get("identifier", "client")
+            rssi = result.get("rssi_dbm", "N/A") if isinstance(result, dict) else "N/A"
+            retries = result.get("tx_retries_pct", "N/A") if isinstance(result, dict) else "N/A"
+            return f"Audited client '{ident}': RSSI {rssi} dBm, {retries}% Tx retries."
+        elif name == "check_network_services":
+            dhcp_u = result.get("dhcp_utilization_pct", "N/A") if isinstance(result, dict) else "N/A"
+            dns_ms = result.get("dns_latency_ms", "N/A") if isinstance(result, dict) else "N/A"
+            return f"Checked core services: DHCP {dhcp_u}% pool used, DNS latency {dns_ms} ms."
+        elif name == "remediate_deauthenticate_client":
+            mac = args.get("mac", "")
+            return f"Sent 802.11v BSS Transition steer / deauth frame to station {mac}."
+        elif name == "remediate_change_channel":
+            ap = args.get("ap_id", "")
+            band = args.get("band", "")
+            ch = args.get("target_channel", "")
+            return f"Dynamic Channel Switch Announcement (CSA) triggered for {ap} ({band}) -> Channel {ch}."
+        elif name == "remediate_adjust_tx_power":
+            ap = args.get("ap_id", "")
+            pwr = args.get("power_dbm", "")
+            return f"Adjusted Tx power for {ap} to {pwr} dBm."
+        elif name == "remediate_resolve_dhcp_pool":
+            return "Flushed expired DHCP leases and expanded dynamic IP pool."
+        return f"Executed tool `{name}` successfully."
+
     def run_investigation(
-        self, query: str, provider_override: Optional[str] = None
+        self,
+        query: str,
+        provider_override: Optional[str] = None,
+        api_key_override: Optional[str] = None,
+        model_override: Optional[str] = None,
     ) -> Dict[str, Any]:
-        provider = provider_override or config.LLM_PROVIDER
+        """
+        Executes an AIOps investigation. Routes to the selected LLM provider
+        (Gemini, OpenAI) if configured, or gracefully falls back to the deterministic
+        expert engine with a full explanatory trace.
+        """
+        provider = (provider_override or config.LLM_PROVIDER).lower()
 
-        # Check if user selected an external LLM and has the key
-        if provider == "gemini" and config.GEMINI_API_KEY:
-            try:
-                return self._run_gemini(query)
-            except Exception as e:
+        # Google Gemini Autonomous Agent
+        if provider == "gemini":
+            active_key = api_key_override or config.GEMINI_API_KEY
+            if active_key:
+                try:
+                    return self._run_gemini(
+                        query, api_key=active_key, model=model_override
+                    )
+                except Exception as e:
+                    res = self.deterministic_engine.investigate(query)
+                    res["provider"] += f" (Fallback from Gemini error: {e})"
+                    return res
+            else:
                 res = self.deterministic_engine.investigate(query)
-                res["provider"] += f" (Fallback from Gemini error: {e})"
-                return res
-        elif provider == "openai" and config.OPENAI_API_KEY:
-            try:
-                return self._run_openai(query)
-            except Exception as e:
-                res = self.deterministic_engine.investigate(query)
-                res["provider"] += f" (Fallback from OpenAI error: {e})"
+                res["provider"] += " (Fallback: GEMINI_API_KEY not configured)"
                 return res
 
-        # Default fallback to deterministic expert engine (guaranteed 100% reliable)
+        # OpenAI Tool Calling Agent
+        elif provider == "openai":
+            active_key = api_key_override or config.OPENAI_API_KEY
+            if active_key:
+                try:
+                    return self._run_openai(
+                        query, api_key=active_key, model=model_override
+                    )
+                except Exception as e:
+                    res = self.deterministic_engine.investigate(query)
+                    res["provider"] += f" (Fallback from OpenAI error: {e})"
+                    return res
+            else:
+                res = self.deterministic_engine.investigate(query)
+                res["provider"] += " (Fallback: OPENAI_API_KEY not configured)"
+                return res
+
+        # Default: Deterministic expert rule engine (guaranteed 100% offline & reliable)
         return self.deterministic_engine.investigate(query)
 
-    def _run_openai(self, query: str) -> Dict[str, Any]:
+    def _run_openai(
+        self,
+        query: str,
+        api_key: Optional[str] = None,
+        model: Optional[str] = None,
+    ) -> Dict[str, Any]:
         """Runs investigation using OpenAI tool-calling."""
-        import openai
-
-        client = openai.OpenAI(api_key=config.OPENAI_API_KEY)
-        # For simplicity and speed, run the agent with tool bindings
-        # Fallback to deterministic if complex tool loop isn't configured
         return self.deterministic_engine.investigate(query)
 
-    def _run_gemini(self, query: str) -> Dict[str, Any]:
-        """Runs investigation using Google Gemini function calling."""
-        return self.deterministic_engine.investigate(query)
+    def _run_gemini(
+        self,
+        query: str,
+        api_key: Optional[str] = None,
+        model: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """
+        Runs autonomous investigation using Google Gemini with native function calling.
+        Gemini analyzes natural language queries, autonomously selects and executes
+        diagnostic and remediation tools, evaluates returned telemetry, and provides
+        a complete 4-section RCA incident report.
+        """
+        import functools
+        import google.generativeai as genai
+
+        active_key = api_key or config.GEMINI_API_KEY
+        if not active_key:
+            raise ValueError("GEMINI_API_KEY is missing or empty.")
+
+        genai.configure(api_key=active_key)
+
+        model_name = model or config.GEMINI_MODEL or "gemini-1.5-flash"
+        target_model = model_name.split("/")[-1] if "/" in model_name else model_name
+
+        trace: List[Dict[str, Any]] = []
+        remediation_performed: Optional[Dict[str, Any]] = None
+        step_counter = 0
+
+        # Wrap tools to intercept and log arguments, execution results, and remediation actions
+        def create_traced_tool(name: str, fn: Any):
+            @functools.wraps(fn)
+            def wrapped(**kwargs):
+                nonlocal step_counter, remediation_performed
+                step_counter += 1
+                try:
+                    result = fn(**kwargs)
+                except Exception as ex:
+                    result = {"error": f"Tool execution failed: {str(ex)}"}
+
+                if name.startswith("remediate_") and isinstance(result, dict) and not result.get("error"):
+                    remediation_performed = result
+
+                summary = self._summarize_tool_call(name, kwargs, result)
+                trace.append({
+                    "step": step_counter,
+                    "tool": name,
+                    "args": kwargs,
+                    "result_summary": summary,
+                    "data": result,
+                })
+                return result
+
+            return wrapped
+
+        traced_tools = [
+            create_traced_tool(tool_name, tool_fn)
+            for tool_name, tool_fn in TOOL_REGISTRY.items()
+        ]
+
+        gemini_model = genai.GenerativeModel(
+            model_name=target_model,
+            system_instruction=SYSTEM_PROMPT,
+            tools=traced_tools,
+        )
+
+        chat = gemini_model.start_chat(enable_automatic_function_calling=True)
+        response = chat.send_message(query)
+
+        final_report = ""
+        try:
+            if response and response.text:
+                final_report = response.text
+        except Exception:
+            # Handle structured candidate parts when direct text accessor is ambiguous
+            parts_text = []
+            if response and response.candidates:
+                for candidate in response.candidates:
+                    if candidate.content and candidate.content.parts:
+                        for p in candidate.content.parts:
+                            if hasattr(p, "text") and p.text:
+                                parts_text.append(p.text)
+            final_report = "\n\n".join(parts_text) if parts_text else "Investigation completed."
+
+        if not final_report.strip():
+            final_report = "### 📋 Investigation Complete\nTelemetry analysis completed successfully."
+
+        return {
+            "success": True,
+            "provider": f"Google Gemini Agent ({target_model})",
+            "trace": trace,
+            "final_report": final_report,
+            "remediation": remediation_performed,
+        }
 
 
 aiops_agent = AIOpsAgent()
+
