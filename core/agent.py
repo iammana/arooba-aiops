@@ -245,6 +245,8 @@ The Arooba-AIOps Agent could not establish a connection to the Edge Telemetry Da
             }
 
         else:
+            uplink_status = "🟢 Connected (1000 Mbps)" if services.get("eth0_carrier", True) else "🔴 Down / No Cable"
+            wan_ms = services.get("wan_latency_ms", 12.0)
             final_report = f"""### 📋 Incident Summary
 - **Evaluation Status:** Comprehensive network telemetry audit completed.
 - **Environment State:** Healthy baseline.
@@ -252,7 +254,7 @@ The Arooba-AIOps Agent could not establish a connection to the Edge Telemetry Da
 ### 🔍 Telemetry Evidence Collected
 - **Access Points Surveyed:** {len(aps)} AP radios operating within optimal airtime limits (< 30% utilization).
 - **Connected Clients:** {len(clients)} active stations reporting average RSSI > -60 dBm and retry rates < 2%.
-- **Core Services:** DHCP pool healthy ({services['dhcp_pool_used']}/{services['dhcp_pool_total']} used), DNS latency at {services['dns_latency_ms']} ms.
+- **Core Services & SLA:** DHCP pool healthy ({services['dhcp_pool_used']}/{services['dhcp_pool_total']} used), DNS latency at {services['dns_latency_ms']} ms, WAN latency at {wan_ms} ms (Ethernet Uplink: {uplink_status}).
 
 ### 🎯 Root Cause Analysis (RCA)
 No active RF anomalies, roaming failures, or infrastructure bottlenecks detected. All stations are operating within standard SLA parameters.

@@ -55,6 +55,14 @@ try:
         roam_count: int = 0
         sticky_client_detected: bool = False
         last_event: str = "NORMAL_OPERATION"
+        # Deep Live RF & Traffic Telemetry
+        rx_bytes: int = 0
+        tx_bytes: int = 0
+        tx_failed: int = 0
+        inactive_time_ms: int = 0
+        connected_time_sec: int = 0
+        bitrate_info: str = ""
+        signal_chains: List[int] = []
 
     class AccessPoint(BaseModel):
         ap_id: str
@@ -70,6 +78,13 @@ try:
         channel_utilization_pct: float = 22.0
         noise_floor_dbm: int = -95
         connected_clients: List[str] = []
+        # Live Hardware & Radio Parameters
+        channel_width_mhz: int = 80
+        tx_power_actual_dbm: float = 20.0
+        cpu_temp_c: Optional[float] = 48.5
+        cpu_load_1m: Optional[float] = 0.25
+        band_mode: str = "Dual-Band 2.4/5GHz"
+        throughput_mbps: float = 0.0
 
     class NetworkServicesStatus(BaseModel):
         dhcp_pool_total: int = 254
@@ -78,6 +93,12 @@ try:
         dns_latency_ms: float = 8.2
         gateway_reachable: bool = True
         radius_auth_status: str = "HEALTHY"
+        # Live Upstream SLA & Network Assurance
+        wan_latency_ms: float = 12.5
+        wan_reachable: bool = True
+        eth0_carrier: bool = True
+        eth0_speed_mbps: int = 1000
+        conntrack_sessions: int = 14
 
     class RemediationResult(BaseModel):
         success: bool
@@ -106,6 +127,13 @@ except ImportError:
         roam_count: int = 0
         sticky_client_detected: bool = False
         last_event: str = "NORMAL_OPERATION"
+        rx_bytes: int = 0
+        tx_bytes: int = 0
+        tx_failed: int = 0
+        inactive_time_ms: int = 0
+        connected_time_sec: int = 0
+        bitrate_info: str = ""
+        signal_chains: List[int] = field(default_factory=list)
 
         def model_dump(self) -> Dict[str, Any]:
             return asdict(self)
@@ -125,6 +153,12 @@ except ImportError:
         channel_utilization_pct: float = 22.0
         noise_floor_dbm: int = -95
         connected_clients: List[str] = field(default_factory=list)
+        channel_width_mhz: int = 80
+        tx_power_actual_dbm: float = 20.0
+        cpu_temp_c: Optional[float] = 48.5
+        cpu_load_1m: Optional[float] = 0.25
+        band_mode: str = "Dual-Band 2.4/5GHz"
+        throughput_mbps: float = 0.0
 
         def model_dump(self) -> Dict[str, Any]:
             return asdict(self)
@@ -137,6 +171,11 @@ except ImportError:
         dns_latency_ms: float = 8.2
         gateway_reachable: bool = True
         radius_auth_status: str = "HEALTHY"
+        wan_latency_ms: float = 12.5
+        wan_reachable: bool = True
+        eth0_carrier: bool = True
+        eth0_speed_mbps: int = 1000
+        conntrack_sessions: int = 14
 
         def model_dump(self) -> Dict[str, Any]:
             return asdict(self)

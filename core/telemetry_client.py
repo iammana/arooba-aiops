@@ -148,16 +148,27 @@ class TelemetryClient:
         if self.mode == "hardware":
             data = self._http_get("/api/v1/telemetry/ap")
             if data and isinstance(data, dict):
+                sys_health = data.get("system_health", {})
+                channel = data.get("channel", 36)
+                band_mode = data.get("band_mode", "5GHz Only (Single-Radio AP)" if channel > 14 else "2.4GHz Only (Single-Radio AP)")
                 return [
                     AccessPoint(
                         ap_id=data.get("ap_id", "pi5-edge-ap"),
                         name=data.get("name", "RaspberryPi-5-Edge-AP"),
                         model=data.get("model", "Raspberry Pi 5 AP"),
                         location=data.get("location", "Physical Edge Testbed"),
-                        channel_2g=data.get("channel", 36),
-                        channel_5g=data.get("channel", 36),
-                        channel_utilization_pct=data.get("channel_utilization_pct", 15.0),
+                        channel_2g=channel if channel <= 14 else 0,
+                        channel_5g=channel if channel > 14 else 0,
+                        channel_width_mhz=data.get("channel_width_mhz", 80),
+                        tx_power_actual_dbm=data.get("tx_power_dbm", 20.0),
+                        tx_power_2g_dbm=int(data.get("tx_power_dbm", 15)) if channel <= 14 else 0,
+                        tx_power_5g_dbm=int(data.get("tx_power_dbm", 20)) if channel > 14 else 0,
+                        channel_utilization_pct=data.get("channel_utilization_pct", 4.2),
                         noise_floor_dbm=data.get("noise_floor_dbm", -95),
+                        cpu_temp_c=sys_health.get("cpu_temp_c", 48.5),
+                        cpu_load_1m=sys_health.get("cpu_load_1m", 0.25),
+                        band_mode=band_mode,
+                        throughput_mbps=data.get("throughput_mbps", 0.0),
                     )
                 ]
             return []
@@ -193,6 +204,13 @@ class TelemetryClient:
                             tx_retries_pct=float(item.get("tx_retries", 0)),
                             sticky_client_detected=item.get("sticky_client_detected", False),
                             connection_state=ConnectionState.CONNECTED,
+                            rx_bytes=item.get("rx_bytes", 0),
+                            tx_bytes=item.get("tx_bytes", 0),
+                            tx_failed=item.get("tx_failed", 0),
+                            inactive_time_ms=item.get("inactive_time_ms", 0),
+                            connected_time_sec=item.get("connected_time_sec", 0),
+                            bitrate_info=item.get("bitrate_info", ""),
+                            signal_chains=item.get("signal_chains", []),
                         )
                     )
                 return results
@@ -220,6 +238,11 @@ class TelemetryClient:
                     dns_latency_ms=data.get("dns_latency_ms", 3.5),
                     gateway_reachable=data.get("gateway_reachable", True),
                     radius_auth_status=data.get("radius_auth_status", "N/A (WPA2-PSK)"),
+                    wan_reachable=data.get("wan_reachable", True),
+                    wan_latency_ms=data.get("wan_latency_ms", 12.0),
+                    eth0_carrier=data.get("eth0_carrier", True),
+                    eth0_speed_mbps=data.get("eth0_speed_mbps", 1000),
+                    conntrack_sessions=data.get("conntrack_sessions", 0),
                 )
             health = self.check_edge_health(timeout=1.0)
             is_online = health.get("connected", False)
@@ -230,6 +253,11 @@ class TelemetryClient:
                 dns_latency_ms=3.5 if is_online else 0.0,
                 gateway_reachable=is_online,
                 radius_auth_status="N/A (WPA2-PSK)",
+                wan_reachable=is_online,
+                wan_latency_ms=12.0 if is_online else 0.0,
+                eth0_carrier=is_online,
+                eth0_speed_mbps=1000 if is_online else 0,
+                conntrack_sessions=0,
             )
         return simulator.get_network_services()
 

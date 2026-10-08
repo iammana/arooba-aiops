@@ -260,6 +260,66 @@ with tab_cockpit:
 
         st.divider()
 
+        # Upstream Network Assurance SLA & Edge AP Health Bar
+        st.subheader("🌐 Upstream Network Assurance SLA & AP Hardware Health")
+        sla_col1, sla_col2, sla_col3, sla_col4, sla_col5 = st.columns(5)
+        with sla_col1:
+            if is_hardware and not is_connected:
+                st.metric("Ethernet Uplink (eth0)", "Offline", delta="Edge Unreachable", delta_color="inverse")
+            else:
+                uplink_ok = services.eth0_carrier
+                st.metric(
+                    "Ethernet Uplink (eth0)",
+                    f"{services.eth0_speed_mbps} Mbps Link" if uplink_ok else "Disconnected",
+                    delta="🟢 Uplink Up" if uplink_ok else "🔴 Cable Unplugged",
+                    delta_color="normal" if uplink_ok else "inverse",
+                )
+        with sla_col2:
+            if is_hardware and not is_connected:
+                st.metric("WAN Internet Latency", "N/A")
+            else:
+                wan_ms = services.wan_latency_ms
+                st.metric(
+                    "WAN Internet Latency",
+                    f"{wan_ms} ms",
+                    delta="🟢 1.1.1.1 RTT (Optimal)" if wan_ms < 30.0 else "⚠️ High WAN Latency",
+                    delta_color="normal" if wan_ms < 30.0 else "inverse",
+                )
+        with sla_col3:
+            if is_hardware and not is_connected:
+                st.metric("DNS Benchmark", "N/A")
+            else:
+                dns_ms = services.dns_latency_ms
+                st.metric(
+                    "DNS Benchmark",
+                    f"{dns_ms} ms",
+                    delta="🟢 Fast Lookup" if dns_ms < 25.0 else "⚠️ Slow DNS",
+                    delta_color="normal" if dns_ms < 25.0 else "inverse",
+                )
+        with sla_col4:
+            if is_hardware and not is_connected:
+                st.metric("Active NAT Sessions", "N/A")
+            else:
+                st.metric(
+                    "Active NAT Sessions",
+                    f"{services.conntrack_sessions}",
+                    delta="conntrack table",
+                )
+        with sla_col5:
+            if aps and aps[0].cpu_temp_c is not None:
+                ap_temp = aps[0].cpu_temp_c
+                is_hot = ap_temp > 70.0
+                st.metric(
+                    "AP SoC Temperature",
+                    f"{ap_temp}°C",
+                    delta="⚠️ Thermal Throttling" if is_hot else f"🟢 Cool (Load: {aps[0].cpu_load_1m})",
+                    delta_color="inverse" if is_hot else "normal",
+                )
+            else:
+                st.metric("AP SoC Temperature", "N/A")
+
+        st.divider()
+
         st.subheader("Managed Access Point Radios")
         if not aps:
             if is_hardware:
@@ -285,10 +345,19 @@ with tab_cockpit:
                         delta="Severe Interference" if is_congested else "Clean Airtime",
                         delta_color="inverse" if is_congested else "normal",
                     )
-                    st.write(f"- **2.4 GHz:** Channel {ap.channel_2g} ({ap.tx_power_2g_dbm} dBm)")
-                    st.write(f"- **5 GHz:** Channel {ap.channel_5g} ({ap.tx_power_5g_dbm} dBm)")
-                    st.write(f"- **Noise Floor:** `{ap.noise_floor_dbm} dBm`")
-                    st.write(f"- **Clients Associated:** `{len(ap.connected_clients)}`")
+                    if is_hardware:
+                        active_chan = ap.channel_5g if ap.channel_5g > 0 else ap.channel_2g
+                        st.write(f"- **Radio & Band:** `{ap.band_mode}`")
+                        st.write(f"- **Operating Channel:** Channel {active_chan} ({ap.channel_width_mhz} MHz Width)")
+                        st.write(f"- **Actual Tx Power:** `{ap.tx_power_actual_dbm} dBm`")
+                        st.write(f"- **Live Throughput:** `{ap.throughput_mbps} Mbps`")
+                        st.write(f"- **Noise Floor:** `{ap.noise_floor_dbm} dBm`")
+                        st.write(f"- **Clients Associated:** `{len(ap.connected_clients)}`")
+                    else:
+                        st.write(f"- **2.4 GHz:** Channel {ap.channel_2g} ({ap.tx_power_2g_dbm} dBm)")
+                        st.write(f"- **5 GHz:** Channel {ap.channel_5g} ({ap.tx_power_5g_dbm} dBm)")
+                        st.write(f"- **Noise Floor:** `{ap.noise_floor_dbm} dBm`")
+                        st.write(f"- **Clients Associated:** `{len(ap.connected_clients)}`")
 
         st.divider()
 
@@ -307,6 +376,16 @@ with tab_cockpit:
                 elif c.sticky_client_detected or c.rssi_dbm < -75:
                     status_emoji = "⚠️ (Sticky / Weak Link)"
 
+                phy_str = f"{c.tx_bitrate_mbps} Mbps"
+                if c.bitrate_info:
+                    phy_str += f" ({c.bitrate_info})"
+
+                tx_mb = round(c.tx_bytes / (1024 * 1024), 2)
+                rx_mb = round(c.rx_bytes / (1024 * 1024), 2)
+                traffic_str = f"{tx_mb} MB ↑ / {rx_mb} MB ↓" if (c.tx_bytes > 0 or c.rx_bytes > 0) else "Active"
+
+                heartbeat_str = f"{c.inactive_time_ms} ms" if c.inactive_time_ms > 0 else "Instant"
+
                 client_data.append({
                     "Status": status_emoji,
                     "Hostname": c.hostname,
@@ -316,8 +395,10 @@ with tab_cockpit:
                     "Band": c.band,
                     "RSSI (dBm)": c.rssi_dbm,
                     "SNR (dB)": c.snr_db,
-                    "PHY Tx (Mbps)": c.tx_bitrate_mbps,
+                    "PHY Rate / MCS": phy_str,
                     "Tx Retries (%)": f"{c.tx_retries_pct}%",
+                    "Traffic Volume": traffic_str,
+                    "Heartbeat": heartbeat_str,
                     "Last Event": c.last_event,
                 })
 

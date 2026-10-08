@@ -60,6 +60,9 @@ class TestTelemetryClient(unittest.TestCase):
                     "channel": 36,
                     "channel_utilization_pct": 18.5,
                     "noise_floor_dbm": -92,
+                    "channel_width_mhz": 80,
+                    "tx_power_dbm": 20.0,
+                    "system_health": {"cpu_temp_c": 49.1, "cpu_load_1m": 0.15},
                 }
             elif path == "/api/v1/telemetry/clients":
                 return [
@@ -74,6 +77,10 @@ class TestTelemetryClient(unittest.TestCase):
                         "rx_bitrate_mbps": 433.0,
                         "tx_retries": 2,
                         "sticky_client_detected": False,
+                        "rx_bytes": 500000,
+                        "tx_bytes": 1200000,
+                        "inactive_time_ms": 50,
+                        "bitrate_info": "VHT-MCS 9 80MHz",
                     }
                 ]
             elif path == "/api/v1/telemetry/services":
@@ -84,6 +91,11 @@ class TestTelemetryClient(unittest.TestCase):
                     "dns_latency_ms": 2.1,
                     "gateway_reachable": True,
                     "radius_auth_status": "N/A",
+                    "wan_reachable": True,
+                    "wan_latency_ms": 11.8,
+                    "eth0_carrier": True,
+                    "eth0_speed_mbps": 1000,
+                    "conntrack_sessions": 25,
                 }
             return None
 
@@ -96,16 +108,23 @@ class TestTelemetryClient(unittest.TestCase):
         self.assertEqual(len(aps), 1)
         self.assertEqual(aps[0].name, "RaspberryPi-5-Edge-AP")
         self.assertEqual(aps[0].channel_utilization_pct, 18.5)
+        self.assertEqual(aps[0].channel_width_mhz, 80)
+        self.assertEqual(aps[0].cpu_temp_c, 49.1)
 
         clients = self.client.get_all_clients()
         self.assertEqual(len(clients), 1)
         self.assertEqual(clients[0].mac, "b4:2e:99:11:22:33")
         self.assertEqual(clients[0].hostname, "Pixel-8")
+        self.assertEqual(clients[0].rx_bytes, 500000)
+        self.assertEqual(clients[0].bitrate_info, "VHT-MCS 9 80MHz")
         self.assertEqual(clients[0].connection_state, ConnectionState.CONNECTED)
 
         services = self.client.get_network_services()
         self.assertEqual(services.dhcp_pool_used, 1)
         self.assertFalse(services.dhcp_exhausted)
+        self.assertEqual(services.wan_latency_ms, 11.8)
+        self.assertTrue(services.eth0_carrier)
+        self.assertEqual(services.conntrack_sessions, 25)
 
     def test_agent_investigation_in_offline_hardware_mode(self):
         from core.telemetry_client import telemetry_client
