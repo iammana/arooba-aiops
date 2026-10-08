@@ -23,6 +23,11 @@ from simulator.models import (
     ConnectionState,
     NetworkServicesStatus,
     RemediationResult,
+    UxiSensorReport,
+    SecurityThreat,
+    AppQoEMetrics,
+    AirMatchPlan,
+    TelemetryAnomaly,
 )
 
 
@@ -366,6 +371,40 @@ class TelemetryClient:
                 message=f"Hardware connection failed: {self.last_error}",
             )
         return simulator.resolve_dhcp_pool()
+
+    # ---------------- Advanced Aruba-Competitive Capabilities ----------------
+
+    def optimize_campus_rf_plan(self) -> AirMatchPlan:
+        """Runs the AirMatch dynamic RF optimization engine."""
+        return simulator.optimize_campus_rf_plan()
+
+    def run_synthetic_uxi_test(self, target_ap_id: Optional[str] = None) -> UxiSensorReport:
+        """Runs an autonomous synthetic UXI client journey probe."""
+        return simulator.run_synthetic_uxi_test(target_ap_id)
+
+    def get_uxi_sensor_status(self) -> UxiSensorReport:
+        """Returns the latest synthetic UXI probe status."""
+        return simulator.get_uxi_sensor_status()
+
+    def scan_wids_security_threats(self) -> List[SecurityThreat]:
+        """Scans for rogue APs, evil twins, and wireless threats."""
+        return simulator.scan_wids_security_threats()
+
+    def contain_rogue_ap(self, bssid: str) -> RemediationResult:
+        """Suppresses rogue AP through airtime containment."""
+        return simulator.contain_rogue_ap(bssid)
+
+    def get_application_qoe(self, identifier: str) -> Optional[AppQoEMetrics]:
+        """Retrieves Layer-7 application quality metrics (Zoom MOS, jitter, packet loss)."""
+        return simulator.get_application_qoe(identifier)
+
+    def get_all_app_qoe(self) -> List[AppQoEMetrics]:
+        """Retrieves application QoE metrics for all active clients."""
+        return simulator.get_all_app_qoe()
+
+    def get_baseline_anomalies(self, ap_id: Optional[str] = None) -> List[TelemetryAnomaly]:
+        """Calculates Z-score statistical anomalies against 7-day baselines."""
+        return simulator.get_baseline_anomalies(ap_id)
 
 
 telemetry_client = TelemetryClient()

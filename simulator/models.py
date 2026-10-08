@@ -63,6 +63,9 @@ try:
         connected_time_sec: int = 0
         bitrate_info: str = ""
         signal_chains: List[int] = []
+        # Spatial floorplan coordinates (0.0 to 100.0)
+        pos_x: float = 50.0
+        pos_y: float = 50.0
 
     class AccessPoint(BaseModel):
         ap_id: str
@@ -85,6 +88,9 @@ try:
         cpu_load_1m: Optional[float] = 0.25
         band_mode: str = "Dual-Band 2.4/5GHz"
         throughput_mbps: float = 0.0
+        # Spatial floorplan coordinates (0.0 to 100.0)
+        pos_x: float = 50.0
+        pos_y: float = 50.0
 
     class NetworkServicesStatus(BaseModel):
         dhcp_pool_total: int = 254
@@ -106,6 +112,71 @@ try:
         target: str
         message: str
         details: Dict[str, Any] = {}
+
+    class UxiSensorReport(BaseModel):
+        sensor_id: str = "uxi-sensor-01"
+        location: str = "Montreal HQ - Floor 2"
+        target_ssid: str = "Arooba-Corp-Secure"
+        target_bssid: str = "00:0b:86:33:44:02"
+        target_ap_name: str = "AP-ConfRoom-B"
+        timestamp: str = ""
+        overall_sla: str = "PASSED"  # PASSED, DEGRADED, FAILED
+        assoc_time_ms: float = 12.4
+        auth_8021x_time_ms: float = 24.6
+        dhcp_dora_time_ms: float = 38.2
+        dns_lookup_time_ms: float = 7.1
+        gateway_rtt_ms: float = 1.9
+        cloud_app_http_ms: float = 32.4
+        dl_throughput_mbps: float = 485.0
+        ul_throughput_mbps: float = 310.0
+        failing_phase: Optional[str] = None
+        error_detail: Optional[str] = None
+
+    class SecurityThreat(BaseModel):
+        threat_id: str
+        threat_type: str  # EVIL_TWIN_AP, ROGUE_AP, DEAUTH_FLOOD, UNENCRYPTED_HONEYPOT
+        severity: str     # CRITICAL, HIGH, MEDIUM
+        ssid: str
+        bssid: str
+        channel: int
+        signal_dbm: int
+        detecting_ap: str
+        description: str
+        is_contained: bool = False
+        mitigation_action: str = ""
+
+    class AppQoEMetrics(BaseModel):
+        mac: str
+        hostname: str
+        zoom_mos_score: float = 4.4  # 1.0 (Bad) to 5.0 (Excellent)
+        zoom_jitter_ms: float = 4.2
+        zoom_packet_loss_pct: float = 0.2
+        zoom_status: str = "EXCELLENT"  # EXCELLENT, DEGRADED, CRITICAL
+        teams_mos_score: float = 4.3
+        teams_jitter_ms: float = 5.1
+        teams_packet_loss_pct: float = 0.3
+        http_ttfb_ms: float = 45.0
+        top_app: str = "Zoom Video Conferencing"
+        bandwidth_consumed_mb: float = 124.5
+
+    class AirMatchPlan(BaseModel):
+        timestamp: str
+        optimization_metric: str = "Co-Channel & Adjacent Channel Interference"
+        pre_cci_score: float
+        post_cci_score: float
+        interference_reduction_pct: float
+        changes: List[Dict[str, Any]] = []
+
+    class TelemetryAnomaly(BaseModel):
+        ap_id: str
+        metric_name: str
+        current_value: float
+        baseline_mean: float
+        baseline_std: float
+        z_score: float
+        is_anomaly: bool
+        severity: str
+        recommendation: str
 
 except ImportError:
     from dataclasses import dataclass, field, asdict
@@ -134,6 +205,8 @@ except ImportError:
         connected_time_sec: int = 0
         bitrate_info: str = ""
         signal_chains: List[int] = field(default_factory=list)
+        pos_x: float = 50.0
+        pos_y: float = 50.0
 
         def model_dump(self) -> Dict[str, Any]:
             return asdict(self)
@@ -159,6 +232,8 @@ except ImportError:
         cpu_load_1m: Optional[float] = 0.25
         band_mode: str = "Dual-Band 2.4/5GHz"
         throughput_mbps: float = 0.0
+        pos_x: float = 50.0
+        pos_y: float = 50.0
 
         def model_dump(self) -> Dict[str, Any]:
             return asdict(self)
@@ -187,6 +262,91 @@ except ImportError:
         target: str
         message: str
         details: Dict[str, Any] = field(default_factory=dict)
+
+        def model_dump(self) -> Dict[str, Any]:
+            return asdict(self)
+
+    @dataclass
+    class UxiSensorReport:
+        sensor_id: str = "uxi-sensor-01"
+        location: str = "Montreal HQ - Floor 2"
+        target_ssid: str = "Arooba-Corp-Secure"
+        target_bssid: str = "00:0b:86:33:44:02"
+        target_ap_name: str = "AP-ConfRoom-B"
+        timestamp: str = ""
+        overall_sla: str = "PASSED"
+        assoc_time_ms: float = 12.4
+        auth_8021x_time_ms: float = 24.6
+        dhcp_dora_time_ms: float = 38.2
+        dns_lookup_time_ms: float = 7.1
+        gateway_rtt_ms: float = 1.9
+        cloud_app_http_ms: float = 32.4
+        dl_throughput_mbps: float = 485.0
+        ul_throughput_mbps: float = 310.0
+        failing_phase: Optional[str] = None
+        error_detail: Optional[str] = None
+
+        def model_dump(self) -> Dict[str, Any]:
+            return asdict(self)
+
+    @dataclass
+    class SecurityThreat:
+        threat_id: str
+        threat_type: str
+        severity: str
+        ssid: str
+        bssid: str
+        channel: int
+        signal_dbm: int
+        detecting_ap: str
+        description: str
+        is_contained: bool = False
+        mitigation_action: str = ""
+
+        def model_dump(self) -> Dict[str, Any]:
+            return asdict(self)
+
+    @dataclass
+    class AppQoEMetrics:
+        mac: str
+        hostname: str
+        zoom_mos_score: float = 4.4
+        zoom_jitter_ms: float = 4.2
+        zoom_packet_loss_pct: float = 0.2
+        zoom_status: str = "EXCELLENT"
+        teams_mos_score: float = 4.3
+        teams_jitter_ms: float = 5.1
+        teams_packet_loss_pct: float = 0.3
+        http_ttfb_ms: float = 45.0
+        top_app: str = "Zoom Video Conferencing"
+        bandwidth_consumed_mb: float = 124.5
+
+        def model_dump(self) -> Dict[str, Any]:
+            return asdict(self)
+
+    @dataclass
+    class AirMatchPlan:
+        timestamp: str
+        pre_cci_score: float
+        post_cci_score: float
+        interference_reduction_pct: float
+        optimization_metric: str = "Co-Channel & Adjacent Channel Interference"
+        changes: List[Dict[str, Any]] = field(default_factory=list)
+
+        def model_dump(self) -> Dict[str, Any]:
+            return asdict(self)
+
+    @dataclass
+    class TelemetryAnomaly:
+        ap_id: str
+        metric_name: str
+        current_value: float
+        baseline_mean: float
+        baseline_std: float
+        z_score: float
+        is_anomaly: bool
+        severity: str
+        recommendation: str
 
         def model_dump(self) -> Dict[str, Any]:
             return asdict(self)

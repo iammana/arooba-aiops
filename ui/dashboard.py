@@ -20,6 +20,7 @@ from simulator.engine import simulator
 from core.config import config
 from core.telemetry_client import telemetry_client
 from core.agent import aiops_agent
+from ui.floorplan import generate_floorplan_svg
 
 # Page Configuration
 st.set_page_config(
@@ -143,10 +144,13 @@ with st.sidebar:
         scenario = st.selectbox(
             "Select Scenario",
             [
-                ("baseline", "✅ Healthy Baseline"),
+                ("baseline", "✅ Healthy Baseline (Optimal RF)"),
                 ("sticky_client", "⚠️ Sticky Client Roaming Drop"),
                 ("channel_congestion", "⚡ Co-Channel Interference (CCI)"),
                 ("dhcp_exhaustion", "🚫 DHCP Scope Exhaustion"),
+                ("evil_twin_attack", "🛡️ Rogue AP / Evil Twin Threat"),
+                ("zoom_audio_jitter", "📹 Zoom QoE & Audio Jitter"),
+                ("campus_rf_conflict", "⚡ Multi-AP Co-Channel Conflict"),
             ],
             format_func=lambda x: x[1],
         )
@@ -188,8 +192,13 @@ st.markdown(
 
 is_hardware = current_mode == "hardware"
 
-# ================= Tabs: Telemetry Cockpit vs Agent Console =================
-tab_cockpit, tab_agent = st.tabs(["📊 Live Telemetry Cockpit", "🤖 Autonomous AI Copilot Console"])
+# ================= Tabs: Telemetry Cockpit vs Visual RF vs UXI vs Agent Console =================
+tab_cockpit, tab_floorplan, tab_uxi_qoe, tab_agent = st.tabs([
+    "📊 Live Telemetry Cockpit",
+    "🗺️ Visual RF & Campus Floorplan",
+    "🧪 Synthetic UXI & App QoE",
+    "🤖 Autonomous AI Copilot Console",
+])
 
 with tab_cockpit:
     @st.fragment(run_every=poll_seconds if auto_refresh else None)
@@ -409,6 +418,116 @@ with tab_cockpit:
     render_live_telemetry_cockpit()
 
 
+with tab_floorplan:
+    st.subheader("🗺️ Visual RF & Campus Floorplan Heatmap (Aruba VisualRF Engine)")
+    st.caption("2D Spatial RF propagation modeling based on Log-Distance Path Loss. Displays live AP cells, station associations, sticky roaming vectors, and WIDS rogue detection.")
+
+    # Action Toolbar
+    act_col1, act_col2, act_col3 = st.columns(3)
+    with act_col1:
+        if st.button("⚡ Run Arooba AirMatch (RF Auto-Tune)", width="stretch", type="primary"):
+            plan = telemetry_client.optimize_campus_rf_plan()
+            st.toast(f"AirMatch RF Optimization Applied! {plan.interference_reduction_pct}% CCI Reduction.", icon="📡")
+            st.rerun()
+    with act_col2:
+        if st.button("🛡️ Scan WIDS Threats", width="stretch"):
+            threats = telemetry_client.scan_wids_security_threats()
+            if threats:
+                st.toast(f"WIDS Alert: {len(threats)} active threat(s) detected!", icon="⚠️")
+            else:
+                st.toast("WIDS Scan: Clean spectrum. No rogue APs detected.", icon="✅")
+    with act_col3:
+        if st.button("🧪 Run Synthetic UXI Probe", width="stretch"):
+            probe = telemetry_client.run_synthetic_uxi_test()
+            st.toast(f"UXI Probe: SLA {probe.overall_sla} ({probe.target_ap_name})", icon="🧪")
+            st.rerun()
+
+    # Fetch live elements for floorplan
+    fp_aps = telemetry_client.get_all_aps()
+    fp_clients = telemetry_client.get_all_clients()
+    fp_threats = telemetry_client.scan_wids_security_threats()
+    fp_uxi = telemetry_client.get_uxi_sensor_status()
+
+    # Render Floorplan SVG
+    svg_content = generate_floorplan_svg(fp_aps, fp_clients, fp_threats, fp_uxi)
+    st.components.v1.html(svg_content, height=540)
+
+    # Active Threat Containment Panel if threats exist
+    if fp_threats:
+        st.error(f"🚨 **ACTIVE WIDS THREAT DETECTED:** {len(fp_threats)} unauthorized rogue device(s) broadcasting.")
+        for t in fp_threats:
+            t_col1, t_col2 = st.columns([4, 1])
+            with t_col1:
+                st.write(f"- **{t.threat_type}**: SSID `{t.ssid}` • BSSID `{t.bssid}` • Channel {t.channel} • Signal: `{t.signal_dbm} dBm` • Detecting AP: `{t.detecting_ap}`")
+                st.caption(f"  *{t.description}*")
+            with t_col2:
+                if not t.is_contained:
+                    if st.button(f"🛡️ Contain {t.bssid[-5:]}", key=f"contain_{t.bssid}"):
+                        c_res = telemetry_client.contain_rogue_ap(t.bssid)
+                        st.success(c_res.message)
+                        st.rerun()
+                else:
+                    st.success("🟢 Contained (Suppressed)")
+
+
+with tab_uxi_qoe:
+    st.subheader("🧪 Synthetic User Experience Insight (UXI) & AppRF Cockpit")
+    st.caption("Proactive synthetic user journey testing & Layer-7 UCC quality assurance (Competes with Aruba UXI & AppRF).")
+
+    uxi_report = telemetry_client.get_uxi_sensor_status()
+
+    # Top UXI Sensor Summary
+    sla_color = "🔴" if uxi_report.overall_sla == "FAILED" else ("🟡" if uxi_report.overall_sla == "DEGRADED" else "🟢")
+    st.markdown(f"### {sla_color} Synthetic UXI Probe Sensor: `{uxi_report.sensor_id}` ({uxi_report.location})")
+    st.caption(f"**Target SSID:** `{uxi_report.target_ssid}` | **Target AP:** `{uxi_report.target_ap_name}` | **Last Tested:** `{uxi_report.timestamp}`")
+
+    if uxi_report.overall_sla != "PASSED":
+        st.warning(f"⚠️ **SLA Degradation Flagged:** Phase `{uxi_report.failing_phase}` breached threshold. Error: `{uxi_report.error_detail}`")
+
+    # 7-Phase Waterfall Latency Metrics
+    u_c1, u_c2, u_c3, u_c4, u_c5, u_c6, u_c7 = st.columns(7)
+    with u_c1:
+        st.metric("1. Assoc Link", f"{uxi_report.assoc_time_ms} ms")
+    with u_c2:
+        st.metric("2. 802.1X Auth", f"{uxi_report.auth_8021x_time_ms} ms")
+    with u_c3:
+        dhcp_ms = uxi_report.dhcp_dora_time_ms
+        st.metric("3. DHCP DORA", f"{dhcp_ms} ms" if dhcp_ms < 5000 else "TIMEOUT", delta="Normal" if dhcp_ms < 100 else "Exhausted", delta_color="normal" if dhcp_ms < 100 else "inverse")
+    with u_c4:
+        st.metric("4. DNS Query", f"{uxi_report.dns_lookup_time_ms} ms")
+    with u_c5:
+        st.metric("5. Gateway RTT", f"{uxi_report.gateway_rtt_ms} ms")
+    with u_c6:
+        st.metric("6. Cloud HTTP", f"{uxi_report.cloud_app_http_ms} ms")
+    with u_c7:
+        st.metric("7. Throughput", f"{uxi_report.dl_throughput_mbps} Mbps")
+
+    st.divider()
+
+    # Application QoE & UCC Monitoring (Zoom, Teams, MOS)
+    st.subheader("📹 Unified Communications & Collaboration (UCC / AppRF) Quality")
+    app_qoe_list = telemetry_client.get_all_app_qoe()
+    if app_qoe_list:
+        qoe_rows = []
+        for q in app_qoe_list:
+            status_badge = "🟢 Excellent" if q.zoom_status == "EXCELLENT" else ("🟡 Degraded" if q.zoom_status == "DEGRADED" else "🔴 Critical")
+            qoe_rows.append({
+                "Station Hostname": q.hostname,
+                "MAC": q.mac,
+                "Zoom MOS Score": f"{q.zoom_mos_score} / 5.0",
+                "Zoom Jitter": f"{q.zoom_jitter_ms} ms",
+                "Zoom Packet Loss": f"{q.zoom_packet_loss_pct}%",
+                "Call Experience": status_badge,
+                "Teams MOS Score": f"{q.teams_mos_score} / 5.0",
+                "HTTP TTFB": f"{q.http_ttfb_ms} ms",
+                "Active App": q.top_app,
+                "Bandwidth": f"{q.bandwidth_consumed_mb} MB",
+            })
+        st.dataframe(pd.DataFrame(qoe_rows), width="stretch", hide_index=True)
+    else:
+        st.info("No active Application QoE sessions recorded.")
+
+
 with tab_agent:
     st.subheader("Autonomous Wi-Fi Incident Investigation")
     st.write(
@@ -467,6 +586,12 @@ with tab_agent:
             default_prompt = "New guests in Conference Room B cannot connect to the Wi-Fi. Devices are stuck acquiring an IP address."
         elif simulator.current_scenario == "channel_congestion":
             default_prompt = "Wi-Fi is running extremely sluggish on AP-ConfRoom-B despite sitting right next to the access point."
+        elif simulator.current_scenario == "evil_twin_attack":
+            default_prompt = "WIDS security alert: Unauthorized rogue BSSID detected broadcasting corporate SSID in Conference Room B. Scan threats and contain."
+        elif simulator.current_scenario == "zoom_audio_jitter":
+            default_prompt = "Executive Zoom meeting in Conference Room B is glitching with robotic voice and choppy audio. Investigate QoE and restore MOS score."
+        elif simulator.current_scenario == "campus_rf_conflict":
+            default_prompt = "Campus-wide sluggishness reported across multiple floors due to channel overlaps. Re-optimize the RF channel plan using AirMatch."
 
     user_ticket = st.text_area("Support Ticket / Diagnostic Query:", value=default_prompt, height=80)
 

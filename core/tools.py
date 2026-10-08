@@ -182,6 +182,66 @@ def remediate_resolve_dhcp_pool() -> Dict[str, Any]:
     return res.model_dump()
 
 
+def run_synthetic_uxi_probe(target_ap_id: str = "ap-conf-b") -> Dict[str, Any]:
+    """
+    Executes an autonomous synthetic User Experience Insight (UXI) probe.
+    Simulates a full station journey: 802.11 Association -> 802.1X/RADIUS -> DHCP DORA ->
+    DNS query -> Gateway ping -> Cloud HTTP -> Throughput.
+    Returns phase-by-phase latency measurements and SLA status.
+    """
+    report = telemetry_client.run_synthetic_uxi_test(target_ap_id)
+    return report.model_dump()
+
+
+def scan_wids_security_threats() -> List[Dict[str, Any]]:
+    """
+    Scans the RF spectrum for Wireless Intrusion Detection/Prevention (WIDS/WIPS) threats:
+    Detects unauthorized Rogue APs, Evil Twin corporate SSIDs, and 802.11 Deauth floods.
+    """
+    threats = telemetry_client.scan_wids_security_threats()
+    return [t.model_dump() for t in threats]
+
+
+def remediate_contain_rogue_ap(bssid: str) -> Dict[str, Any]:
+    """
+    Executes automated WIPS airtime containment against an unauthorized Rogue AP / Evil Twin.
+    Transmits targeted 802.11 deauthentication frames to suppress malicious associations.
+    """
+    res = telemetry_client.contain_rogue_ap(bssid)
+    return res.model_dump()
+
+
+def remediate_optimize_campus_rf_plan() -> Dict[str, Any]:
+    """
+    Executes Arooba AirMatch automated RF optimization across all campus AP radios.
+    Applies graph-coloring constraint solving to reallocate 2.4 GHz and 5 GHz channels,
+    tune transmit powers, and eliminate Co-Channel Interference (CCI).
+    """
+    plan = telemetry_client.optimize_campus_rf_plan()
+    return plan.model_dump()
+
+
+def get_application_qoe_telemetry(identifier: str) -> Dict[str, Any]:
+    """
+    Retrieves Layer-7 application Quality of Experience (QoE / UCC) metrics for a station
+    (Zoom, Microsoft Teams, WebRTC, HTTP).
+    Returns Mean Opinion Score (MOS 1.0 - 5.0), jitter, and packet loss.
+    """
+    qoe = telemetry_client.get_application_qoe(identifier)
+    if not qoe:
+        return {"error": f"No Application QoE data for '{identifier}'"}
+    return qoe.model_dump()
+
+
+def get_baseline_anomalies(ap_id: str = "") -> List[Dict[str, Any]]:
+    """
+    Calculates statistical Z-score anomalies against 7-day rolling performance baselines.
+    Flags significant deviations in airtime utilization and frame retry rates.
+    """
+    anomalies = telemetry_client.get_baseline_anomalies(ap_id if ap_id else None)
+    return [a.model_dump() for a in anomalies]
+
+
 # Registry of available tools for LLM agent
 TOOL_REGISTRY = {
     "list_access_points": list_access_points,
@@ -193,4 +253,10 @@ TOOL_REGISTRY = {
     "remediate_change_channel": remediate_change_channel,
     "remediate_adjust_tx_power": remediate_adjust_tx_power,
     "remediate_resolve_dhcp_pool": remediate_resolve_dhcp_pool,
+    "run_synthetic_uxi_probe": run_synthetic_uxi_probe,
+    "scan_wids_security_threats": scan_wids_security_threats,
+    "remediate_contain_rogue_ap": remediate_contain_rogue_ap,
+    "remediate_optimize_campus_rf_plan": remediate_optimize_campus_rf_plan,
+    "get_application_qoe_telemetry": get_application_qoe_telemetry,
+    "get_baseline_anomalies": get_baseline_anomalies,
 }

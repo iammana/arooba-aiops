@@ -54,17 +54,27 @@ flowchart TD
 
 ---
 
-## ⚡ Key Highlights
+## ⚡ Key Highlights & Aruba-Competitive Feature Suite
 
 * **Dual-Mode Deployment:**
   * **Simulation Mode:** Pre-loaded multi-AP campus deployment. Instant evaluation on any Mac/PC with **zero hardware**.
   * **Hardware Mode (Raspberry Pi 5):** Turns a Pi 5 into an actual Wi-Fi Access Point broadcasting an SSID, running real Linux `hostapd` / `dnsmasq`, and exposing live kernel 802.11 telemetry (`iw dev wlan0 station dump`).
 * **Zero-Dependency Demo Guarantee:** Ships with an intelligent, deterministic rule engine that runs locally with **0 API keys required**, while seamlessly supporting **Google Gemini**, **OpenAI GPT-4o**, and **Anthropic Claude**.
+* **Aruba Enterprise Competitive Features:**
+  1. 📡 **Arooba AirMatch (Algorithmic RF Plan Optimizer):** Graph-coloring constraint solver that eliminates campus-wide Co-Channel Interference (CCI) by allocating orthogonal 2.4/5GHz channels and balancing radio Tx powers.
+  2. 🗺️ **Visual RF & Campus Floorplan Heatmap:** 2D spatial RF canvas modeling signal propagation (Log-Distance Path Loss), AP coverage cells, live station links, sticky client roam vectors, and rogue threats.
+  3. 🧪 **Synthetic UXI Probe Engine (Aruba UXI Equivalent):** Autonomous synthetic client journey sensor measuring 7 sequential link phases: 802.11 Assoc, 802.1X Auth, DHCP DORA, DNS query, Gateway ping, Cloud HTTP, and Throughput benchmarks.
+  4. 🛡️ **WIDS / WIPS Rogue AP Threat Containment (RFProtect):** Detects unauthorized Rogue APs and Evil Twin corporate SSID spoofers, with one-click automated 802.11 deauthentication airtime containment.
+  5. 📹 **Layer-7 AppRF & UCC Telemetry (Zoom / Teams):** Tracks Mean Opinion Score (MOS 1.0–5.0), packet jitter (ms), and UDP loss (%) for VoIP/video conferences correlated with L2 Wi-Fi frame retries.
+  6. 📈 **Statistical Baseline Anomaly Detection (AI Insights):** Calculates Z-scores against rolling performance baselines to detect abnormal airtime utilization surges before tickets are filed.
 * **Pre-Canned Incident Scenarios:**
   1. **Sticky Client Syndrome:** Client walked across the building but is stubbornly stuck to a distant 2.4 GHz AP at -83 dBm instead of a nearby Wi-Fi 6 AP (-46 dBm).
   2. **Co-Channel Interference (CCI):** Channel utilization surges to 91% due to airtime congestion.
   3. **Silent DHCP Exhaustion:** Wi-Fi link association succeeds, but station is trapped in `DHCP_DISCOVER_TIMEOUT`.
-* **Automated Remediation:** Issues 802.11v BSS Transition Management frames, channel switch announcements (CSA), or DHCP pool lease purges.
+  4. **Rogue AP / Evil Twin Attack:** Unauthorized AP spoofing corporate SSID to harvest credentials in Conf Room B.
+  5. **Zoom UCC Quality Degradation:** High RF retry rates causing jitter buffer overrun and robotic voice cutouts (MOS drops to 2.1).
+  6. **Multi-AP Co-Channel Conflict:** All campus APs overlapping on identical channels, resolved via AirMatch optimization.
+* **Automated Remediation:** Issues 802.11v BSS Transition Management frames, channel switch announcements (CSA), WIPS rogue containment, AirMatch RF re-plans, or DHCP pool lease purges.
 
 ---
 
