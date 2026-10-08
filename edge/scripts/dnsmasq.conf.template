@@ -7,7 +7,10 @@ domain=wlan
 address=/gw.wlan/192.168.4.1
 dhcp-leasefile=/var/lib/misc/dnsmasq.leases
 
-# Upstream DNS servers
+# Do not read /etc/resolv.conf (prevents dnsmasq from modifying or polling host DNS)
+no-resolv
+
+# Upstream DNS servers for Wi-Fi clients
 server=8.8.8.8
 server=1.1.1.1
 
