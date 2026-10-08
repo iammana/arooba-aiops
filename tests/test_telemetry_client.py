@@ -25,7 +25,7 @@ class TestTelemetryClient(unittest.TestCase):
         self.client.set_edge_host("http://192.168.1.150:8000/")
         self.assertEqual(self.client.get_edge_host(), "http://192.168.1.150:8000")
 
-    @patch("core.telemetry_client.TelemetryClient._http_get")
+    @patch.object(TelemetryClient, "_http_get")
     def test_hardware_mode_unreachable_returns_empty_and_offline(self, mock_http_get):
         mock_http_get.return_value = None
         self.client.set_mode("hardware")
@@ -43,7 +43,7 @@ class TestTelemetryClient(unittest.TestCase):
         clients = self.client.get_all_clients()
         self.assertEqual(len(clients), 0)
 
-    @patch("core.telemetry_client.TelemetryClient._http_get")
+    @patch.object(TelemetryClient, "_http_get")
     def test_hardware_mode_mocked_success(self, mock_http_get):
         self.client.set_mode("hardware")
 
@@ -129,7 +129,7 @@ class TestTelemetryClient(unittest.TestCase):
         self.assertTrue(services.eth0_carrier)
         self.assertEqual(services.conntrack_sessions, 25)
 
-    @patch("core.telemetry_client.TelemetryClient._http_get")
+    @patch.object(TelemetryClient, "_http_get")
     def test_agent_investigation_in_offline_hardware_mode(self, mock_http_get):
         mock_http_get.return_value = None
         from core.telemetry_client import telemetry_client
