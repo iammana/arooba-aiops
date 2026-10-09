@@ -280,7 +280,7 @@ with tab_cockpit:
                 uplink_ok = services.eth0_carrier
                 st.metric(
                     "Ethernet Uplink (eth0)",
-                    f"{services.eth0_speed_mbps} Mbps Link" if uplink_ok else "Disconnected",
+                    f"{services.eth0_speed_mbps} Mbps" if uplink_ok else "Disconnected",
                     delta="🟢 Uplink Up" if uplink_ok else "🔴 Cable Unplugged",
                     delta_color="normal" if uplink_ok else "inverse",
                 )
