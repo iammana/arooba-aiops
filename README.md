@@ -1,6 +1,7 @@
 # 📡 Arooba-AIOps: Autonomous Wi-Fi Operations Copilot
 
 [![Arooba-AIOps CI](https://img.shields.io/badge/CI-passing-brightgreen.svg)](https://github.com/iammana/arooba-aiops/actions)
+[![Interactive Live Demo](https://img.shields.io/badge/🎮%20Live%20Demo-Try%20Interactive%20Simulation-ff8300?style=for-the-badge&logo=googlechrome&logoColor=white)](https://iammana.github.io/arooba-aiops/)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue.svg)](https://www.python.org/)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Wi-Fi 6/6E Telemetry](https://img.shields.io/badge/Wi--Fi-802.11ax%20%7C%20802.11v%2Fk-orange.svg)](#)
@@ -22,6 +23,49 @@ Diagnosing this manually requires correlating:
 4. **Core Infrastructure Services:** 802.1X/RADIUS authentication, DHCP scope exhaustion, and DNS latency.
 
 **Arooba-AIOps** bridges low-level wireless telemetry and autonomous AI agents. It investigates complaints, systematically executes diagnostic tools, determines the definitive Root Cause Analysis (RCA), and performs closed-loop remediation (e.g. 802.11v BSS Transition steering, dynamic channel switching, or DHCP lease recovery).
+
+---
+
+## 🎮 Interactive Live Demo
+
+> 🚀 **Experience the Zero-Install Browser Simulation:**  
+> ### **[👉 Click Here to Launch the Live Interactive Demo](https://iammana.github.io/arooba-aiops/)**
+> 
+> *Explore the Arooba-AIOps copilot directly in your browser with **zero installation**, **zero hardware**, and **zero API keys required**:*
+> * 🧪 **Inject Pre-Canned Incidents:** Simulate Sticky Client Syndrome, Co-Channel Interference (CCI), DHCP Pool Exhaustion, Rogue AP / Evil Twin Threat, and Zoom UCC Jitter.
+> * 🤖 **Execute the AI Copilot:** Watch real-time tool calls (`list_connected_clients`, `get_client_telemetry`, `get_ap_rf_health`, `check_network_services`), definitive Root Cause Analysis (RCA), and 1-click closed-loop self-healing remediation.
+> * 🗺️ **Visual RF Floorplan Canvas:** Explore campus RF propagation heatmaps, station signal links, sticky roaming vectors, and one-click **Arooba AirMatch** channel re-optimization.
+> * 🧪 **Synthetic UXI Probe Lifecycle:** Inspect the 7-phase synthetic client journey sensor (802.11 Assoc through Throughput benchmark) and Zoom/Teams MOS score telemetry.
+
+---
+
+## 📸 Visual Walkthrough & Dashboard Showcase
+
+### 1. 📊 Live Telemetry Cockpit
+*Unified multi-AP fleet health, airtime utilization gauges, connected client 802.11 telemetry (RSSI, SNR, PHY bitrates, frame retries), and upstream WAN/DNS assurance SLA.*
+
+![Arooba-AIOps Live Telemetry Cockpit](docs/assets/cockpit_dashboard.png)
+
+---
+
+### 2. 🗺️ Visual RF & 2D Campus Floorplan Heatmap
+*Architectural 2D blueprint modeling RF signal propagation (Log-Distance Path Loss), AP coverage cells, client station links, sticky client roaming vectors, and one-click **Arooba AirMatch** constraint solver channel optimization.*
+
+![Visual RF & Campus Floorplan Heatmap](docs/assets/visual_rf_floorplan.png)
+
+---
+
+### 3. 🤖 Autonomous AI Copilot Console & Root Cause Analysis
+*Natural language ticket ingestion, multi-step diagnostic reasoning trace with real-time tool inspection (JSON telemetry), definitive RCA breakdown, and closed-loop 802.11v BSS transition / auto-remediation.*
+
+![Autonomous AI Copilot Console](docs/assets/ai_copilot_investigation.png)
+
+---
+
+### 4. 🧪 Synthetic UXI Probe Engine & UCC / AppRF QoE
+*Autonomous client lifecycle sensor measuring 7 sequential link phases (802.11 Assoc, 802.1X, DHCP DORA, DNS query, Gateway ping, Cloud HTTP, Throughput) alongside real-time VoIP & Zoom/Teams Mean Opinion Score (MOS 1.0–5.0) and packet jitter tracking.*
+
+![Synthetic UXI & App QoE](docs/assets/uxi_qoe_diagnostics.png)
 
 ---
 
@@ -78,9 +122,18 @@ flowchart TD
 
 ---
 
-## 🚀 Quickstart (30 Seconds)
+## 🚀 Quickstart
 
-### 1. Clone & Set Up Environment
+### Option A: Zero-Install Interactive Live Demo (Instant)
+
+Run the full interactive simulation directly in your web browser with zero setup:
+👉 **[Launch Interactive Web Demo (GitHub Pages)](https://iammana.github.io/arooba-aiops/)**
+
+---
+
+### Option B: Local Python Streamlit Dashboard
+
+#### 1. Clone & Set Up Environment
 
 ```bash
 git clone https://github.com/iammana/arooba-aiops.git
@@ -94,7 +147,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 2. Run the Interactive Web Dashboard
+#### 2. Run the Interactive Web Dashboard
 
 ```bash
 streamlit run ui/dashboard.py
@@ -196,6 +249,14 @@ arooba-aiops/
 ├── requirements.txt               # Python dependencies
 ├── .env.example                   # Environment configuration template
 ├── .github/workflows/ci.yml       # GitHub Actions CI matrix
+│
+├── docs/                          # Interactive Demo & Visual Assets
+│   ├── index.html                 # Zero-install simulated live demo (GitHub Pages)
+│   └── assets/                    # High-resolution dashboard screenshots
+│       ├── cockpit_dashboard.png
+│       ├── visual_rf_floorplan.png
+│       ├── ai_copilot_investigation.png
+│       └── uxi_qoe_diagnostics.png
 │
 ├── core/                          # AI Agent Core & Telemetry Client
 │   ├── config.py                  # Environment config

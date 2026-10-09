@@ -1,0 +1,1555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arooba-AIOps | Autonomous Wi-Fi Operations Copilot (Live Interactive Demo)</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22><text y=%2226%22 font-size=%2224%22>📡</text></svg>">
+  <style>
+    :root {
+      --bg-dark: #0e1117;
+      --bg-sidebar: #131722;
+      --bg-card: #1a1f2c;
+      --bg-card-hover: #22293a;
+      --border-color: #30363d;
+      --text-main: #f0f6fc;
+      --text-muted: #8b949e;
+      --accent-orange: #ff8300;
+      --accent-orange-hover: #e07400;
+      --color-green: #238636;
+      --color-green-light: #3fb950;
+      --color-red: #da3633;
+      --color-red-light: #f85149;
+      --color-blue: #1f6feb;
+      --color-blue-light: #58a6ff;
+      --color-purple: #8957e5;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      display: flex;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Top banner */
+    .top-banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 38px;
+      background: linear-gradient(90deg, #1f2937, #111827);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      font-size: 0.85rem;
+      z-index: 1000;
+    }
+    .top-banner a {
+      color: var(--accent-orange);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .top-banner a:hover {
+      text-decoration: underline;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 320px;
+      background-color: var(--bg-sidebar);
+      border-right: 1px solid var(--border-color);
+      padding: 55px 20px 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      flex-shrink: 0;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      overflow-y: auto;
+    }
+
+    .brand-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--accent-orange);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand-caption {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.3;
+    }
+
+    .sidebar-section {
+      border-top: 1px solid var(--border-color);
+      padding-top: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .sidebar-heading {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .radio-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 0.85rem;
+    }
+    .radio-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+    .radio-label.active {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+    .radio-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 2px solid var(--border-color);
+      display: inline-block;
+      position: relative;
+    }
+    .radio-label.active .radio-dot {
+      border-color: var(--accent-orange);
+    }
+    .radio-label.active .radio-dot::after {
+      content: "";
+      width: 6px;
+      height: 6px;
+      background: var(--accent-orange);
+      border-radius: 50%;
+      position: absolute;
+      top: 2px;
+      left: 2px;
+    }
+
+    .status-badge-box {
+      background: rgba(35, 134, 54, 0.15);
+      border: 1px solid rgba(63, 185, 80, 0.3);
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      color: var(--color-green-light);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    select, input, textarea {
+      width: 100%;
+      background: #0d1117;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      outline: none;
+    }
+    select:focus, input:focus, textarea:focus {
+      border-color: var(--accent-orange);
+    }
+
+    .btn {
+      background: #21262d;
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+      width: 100%;
+    }
+    .btn:hover {
+      background: #30363d;
+    }
+    .btn-primary {
+      background: var(--accent-orange);
+      border-color: var(--accent-orange);
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: var(--accent-orange-hover);
+    }
+    .btn-success {
+      background: var(--color-green);
+      border-color: var(--color-green);
+      color: #fff;
+    }
+    .btn-success:hover {
+      background: #2ea043;
+    }
+
+    /* Main Content Area */
+    .main-container {
+      flex: 1;
+      padding: 55px 35px 40px;
+      overflow-y: auto;
+      max-width: 1400px;
+    }
+
+    .header-section {
+      margin-bottom: 24px;
+    }
+    .main-header {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--accent-orange);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sub-header {
+      font-size: 1rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Navigation Tabs */
+    .tabs-nav {
+      display: flex;
+      border-bottom: 2px solid var(--border-color);
+      margin-bottom: 25px;
+      gap: 8px;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      padding: 10px 18px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.2s;
+    }
+    .tab-btn:hover {
+      color: var(--text-main);
+    }
+    .tab-btn.active {
+      color: var(--text-main);
+      border-bottom-color: var(--accent-orange);
+    }
+
+    /* Tab Panes */
+    .tab-pane {
+      display: none;
+      animation: fadeIn 0.25s ease-in-out;
+    }
+    .tab-pane.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Metric Cards Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .metric-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      border-left: 4px solid var(--accent-orange);
+    }
+    .metric-card.green-accent {
+      border-left-color: var(--color-green-light);
+    }
+    .metric-card.blue-accent {
+      border-left-color: var(--color-blue-light);
+    }
+    .metric-card.red-accent {
+      border-left-color: var(--color-red-light);
+    }
+    .metric-title {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+    .metric-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    .metric-delta {
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .delta-green { color: var(--color-green-light); }
+    .delta-red { color: var(--color-red-light); }
+
+    /* Tables */
+    .table-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 24px;
+      overflow-x: auto;
+    }
+    .table-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      text-align: left;
+    }
+    th {
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-color);
+      padding: 10px 12px;
+      font-weight: 600;
+    }
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(48, 54, 61, 0.4);
+    }
+    tr:hover td {
+      background: var(--bg-card-hover);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .badge-green { background: rgba(35, 134, 54, 0.2); color: var(--color-green-light); border: 1px solid rgba(63, 185, 80, 0.3); }
+    .badge-orange { background: rgba(255, 131, 0, 0.2); color: var(--accent-orange); border: 1px solid rgba(255, 131, 0, 0.3); }
+    .badge-red { background: rgba(218, 54, 51, 0.2); color: var(--color-red-light); border: 1px solid rgba(248, 81, 73, 0.3); }
+    .badge-blue { background: rgba(31, 111, 235, 0.2); color: var(--color-blue-light); border: 1px solid rgba(88, 166, 255, 0.3); }
+
+    /* Floorplan Canvas / SVG */
+    .floorplan-container {
+      background: #0d1117;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 24px;
+      position: relative;
+    }
+    .floorplan-toolbar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .floorplan-toolbar .btn {
+      width: auto;
+    }
+
+    /* UXI Phase Cards */
+    .uxi-phases {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .uxi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 12px 10px;
+      text-align: center;
+    }
+    .uxi-step {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .uxi-val {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    .uxi-status {
+      font-size: 0.7rem;
+      margin-top: 4px;
+    }
+
+    /* AI Agent Console */
+    .agent-ticket-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 18px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .trace-container {
+      background: #0d1117;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 18px;
+      display: none;
+    }
+    .trace-step {
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px dashed var(--border-color);
+    }
+    .trace-step:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+    }
+    .trace-title {
+      font-weight: 600;
+      color: var(--color-blue-light);
+      margin-bottom: 4px;
+      font-size: 0.9rem;
+    }
+    .trace-code {
+      background: #161b22;
+      border-radius: 6px;
+      padding: 10px;
+      font-family: monospace;
+      font-size: 0.8rem;
+      color: #c9d1d9;
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+    .report-box {
+      background: rgba(35, 134, 54, 0.08);
+      border: 1px solid rgba(63, 185, 80, 0.3);
+      border-radius: 8px;
+      padding: 18px;
+      margin-top: 18px;
+      display: none;
+    }
+    .report-box h3 {
+      color: var(--color-green-light);
+      margin-bottom: 10px;
+      font-size: 1.1rem;
+    }
+    .remediation-box {
+      background: rgba(255, 131, 0, 0.1);
+      border: 1px solid rgba(255, 131, 0, 0.3);
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      background: #238636;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      z-index: 2000;
+      display: none;
+      animation: slideIn 0.25s ease;
+    }
+    @keyframes slideIn {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @media (max-width: 900px) {
+      body { flex-direction: column; }
+      .sidebar { width: 100%; height: auto; position: static; padding-top: 50px; }
+      .uxi-phases { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Info Header -->
+  <div class="top-banner">
+    <div>
+      🎮 <strong>Interactive Simulated Demo</strong> — Arooba-AIOps Autonomous Enterprise Wi-Fi Operations Copilot
+    </div>
+    <div>
+      <a href="https://github.com/iammana/arooba-aiops" target="_blank">⭐ GitHub Repository</a>
+      &nbsp;|&nbsp;
+      <a href="#quickstart" onclick="alert('Run locally: streamlit run ui/dashboard.py\nOr deploy on Raspberry Pi 5 AP!');">🚀 Quickstart</a>
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div>
+      <div class="brand-title">📡 Arooba-AIOps</div>
+      <div class="brand-caption">Autonomous Network Operations for Enterprise Wi-Fi APs</div>
+    </div>
+
+    <!-- Telemetry Source -->
+    <div class="sidebar-section">
+      <div class="sidebar-heading">🌐 Telemetry Source</div>
+      <div class="radio-group">
+        <div class="radio-label active" id="radio-sim" onclick="setMode('simulated')">
+          <span class="radio-dot"></span> Simulated Campus (Virtual APs)
+        </div>
+        <div class="radio-label" id="radio-edge" onclick="setMode('hardware')">
+          <span class="radio-dot"></span> Physical Edge (Raspberry Pi 5)
+        </div>
+      </div>
+      <div class="status-badge-box" id="mode-status-box">
+        💻 Running Multi-AP In-Memory Simulation
+      </div>
+    </div>
+
+    <!-- Scenario Injection -->
+    <div class="sidebar-section" id="scenario-section">
+      <div class="sidebar-heading">🧪 Inject Incident Scenario</div>
+      <select id="scenario-select" onchange="previewScenario()">
+        <option value="baseline">✅ Healthy Baseline (Optimal RF)</option>
+        <option value="sticky_client">⚠️ Sticky Client Roaming Drop</option>
+        <option value="channel_congestion">⚡ Co-Channel Interference (CCI)</option>
+        <option value="dhcp_exhaustion">🚫 DHCP Scope Exhaustion</option>
+        <option value="evil_twin_attack">🛡️ Rogue AP / Evil Twin Threat</option>
+        <option value="zoom_audio_jitter">📹 Zoom QoE & Audio Jitter</option>
+        <option value="campus_rf_conflict">⚡ Multi-AP Co-Channel Conflict</option>
+      </select>
+      <button class="btn" onclick="applySelectedScenario()">Apply Scenario</button>
+    </div>
+
+    <!-- Telemetry Stream -->
+    <div class="sidebar-section">
+      <div class="sidebar-heading">⏱️ Live Telemetry Stream</div>
+      <div style="font-size: 0.8rem; color: var(--text-muted); display:flex; justify-content:space-between; align-items:center;">
+        <span>Auto-Poll Stream</span>
+        <input type="checkbox" id="autopoll-check" checked onchange="toggleAutoPoll()" style="width:18px; height:18px; cursor:pointer;">
+      </div>
+      <div style="font-size: 0.75rem; color: #58a6ff;" id="poll-clock">
+        🟢 Live Stream Active • Polling every 3s
+      </div>
+    </div>
+
+    <div style="margin-top: auto; font-size: 0.75rem; color: var(--text-muted);">
+      Arooba-AIOps Autonomous Engine<br>
+      Dual-Mode Cloud Sim & Edge Pi 5
+    </div>
+  </aside>
+
+  <!-- Main Container -->
+  <main class="main-container">
+    <div class="header-section">
+      <div class="main-header">📡 Arooba-AIOps Copilot</div>
+      <div class="sub-header">Autonomous Wi-Fi Assurance, RF Telemetry Analytics & Self-Healing Agent</div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="tabs-nav">
+      <button class="tab-btn active" onclick="switchTab('cockpit')">📊 Live Telemetry Cockpit</button>
+      <button class="tab-btn" onclick="switchTab('floorplan')">🗺️ Visual RF & Campus Floorplan</button>
+      <button class="tab-btn" onclick="switchTab('uxi')">🧪 Synthetic UXI & App QoE</button>
+      <button class="tab-btn" onclick="switchTab('agent')">🤖 Autonomous AI Copilot Console</button>
+    </div>
+
+    <!-- TAB 1: Live Telemetry Cockpit -->
+    <section class="tab-pane active" id="pane-cockpit">
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-title">Managed APs</div>
+          <div class="metric-value" id="val-ap-count">3</div>
+          <div class="metric-delta delta-green">↑ All Online</div>
+        </div>
+        <div class="metric-card blue-accent">
+          <div class="metric-title">Connected Stations</div>
+          <div class="metric-value" id="val-client-count">5</div>
+          <div class="metric-delta delta-green">↑ Active Clients</div>
+        </div>
+        <div class="metric-card" id="card-util">
+          <div class="metric-title">Avg Channel Utilization</div>
+          <div class="metric-value" id="val-avg-util">23.9%</div>
+          <div class="metric-delta delta-green" id="delta-util">↑ Optimal</div>
+        </div>
+        <div class="metric-card" id="card-dhcp">
+          <div class="metric-title">DHCP Pool Usage</div>
+          <div class="metric-value" id="val-dhcp-usage">17.7%</div>
+          <div class="metric-delta delta-green" id="delta-dhcp">↑ Healthy Pool</div>
+        </div>
+      </div>
+
+      <!-- Upstream SLA Cards -->
+      <div class="table-card">
+        <div class="table-title">🌐 Upstream Network Assurance SLA & AP Hardware Health</div>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:12px; margin-top:8px;">
+          <div>
+            <div style="font-size:0.75rem; color:var(--text-muted);">Ethernet Uplink (eth0)</div>
+            <div style="font-size:1.3rem; font-weight:700;">1000 Mbps Link</div>
+            <span class="badge badge-green">↑ Uplink Up</span>
+          </div>
+          <div>
+            <div style="font-size:0.75rem; color:var(--text-muted);">WAN Internet Latency</div>
+            <div style="font-size:1.3rem; font-weight:700;" id="val-wan-latency">12.5 ms</div>
+            <span class="badge badge-green">↑ 1.1.1.1 RTT</span>
+          </div>
+          <div>
+            <div style="font-size:0.75rem; color:var(--text-muted);">DNS Benchmark</div>
+            <div style="font-size:1.3rem; font-weight:700;">8.2 ms</div>
+            <span class="badge badge-green">↑ Fast Lookup</span>
+          </div>
+          <div>
+            <div style="font-size:0.75rem; color:var(--text-muted);">Active NAT Sessions</div>
+            <div style="font-size:1.3rem; font-weight:700;">14</div>
+            <span class="badge badge-green">↑ conntrack stable</span>
+          </div>
+          <div>
+            <div style="font-size:0.75rem; color:var(--text-muted);">AP SoC Temperature</div>
+            <div style="font-size:1.3rem; font-weight:700;">48.5°C</div>
+            <span class="badge badge-green">↑ Cool (Load 0.25)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Access Points Table -->
+      <div class="table-card">
+        <div class="table-title">📡 Managed Access Point Radios</div>
+        <table>
+          <thead>
+            <tr>
+              <th>AP Name</th>
+              <th>Model</th>
+              <th>Location</th>
+              <th>2.4GHz Ch</th>
+              <th>5GHz Ch</th>
+              <th>Airtime Utilization</th>
+              <th>Clients</th>
+              <th>Tx Power</th>
+            </tr>
+          </thead>
+          <tbody id="ap-table-body">
+            <tr>
+              <td><strong>🟢 AP-Lobby-Main</strong></td>
+              <td>Arooba AP-635 (Wi-Fi 6E)</td>
+              <td>Montreal HQ - Ground Lobby</td>
+              <td><span class="badge badge-blue">Ch 1 (20MHz)</span></td>
+              <td><span class="badge badge-blue">Ch 36 (80MHz)</span></td>
+              <td>18.5%</td>
+              <td>2</td>
+              <td>18 dBm</td>
+            </tr>
+            <tr id="row-ap-conf">
+              <td><strong>🟢 AP-ConfRoom-B</strong></td>
+              <td>Arooba AP-635 (Wi-Fi 6E)</td>
+              <td>Montreal HQ - Floor 2 - Conf Room B</td>
+              <td><span class="badge badge-blue" id="ch-conf-24">Ch 6 (20MHz)</span></td>
+              <td><span class="badge badge-blue" id="ch-conf-5">Ch 149 (80MHz)</span></td>
+              <td id="util-conf">24.0%</td>
+              <td id="clients-conf">1</td>
+              <td>20 dBm</td>
+            </tr>
+            <tr>
+              <td><strong>🟢 AP-Engineering-Lab</strong></td>
+              <td>Arooba AP-655 (High-Density)</td>
+              <td>Montreal HQ - Floor 3 - Engineering</td>
+              <td><span class="badge badge-blue">Ch 11 (20MHz)</span></td>
+              <td><span class="badge badge-blue">Ch 44 (80MHz)</span></td>
+              <td>29.2%</td>
+              <td>2</td>
+              <td>22 dBm</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Clients Table -->
+      <div class="table-card">
+        <div class="table-title">💻 Connected Client Stations (Real-Time 802.11 Telemetry)</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Station Hostname</th>
+              <th>MAC Address</th>
+              <th>IP Address</th>
+              <th>Associated AP</th>
+              <th>Band</th>
+              <th>RSSI</th>
+              <th>SNR</th>
+              <th>PHY Bitrate</th>
+              <th>Retry %</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="clients-table-body">
+            <tr>
+              <td>MacBookPro-Sales</td>
+              <td><code>a4:83:e7:10:00:01</code></td>
+              <td>10.20.1.101</td>
+              <td>AP-Lobby-Main</td>
+              <td>5 GHz</td>
+              <td>-52 dBm</td>
+              <td>44 dB</td>
+              <td>1201 Mbps</td>
+              <td>1.2%</td>
+              <td><span class="badge badge-green">Healthy</span></td>
+            </tr>
+            <tr id="row-client-sticky">
+              <td id="client-name-target">MacBook-Exec-Zoom</td>
+              <td><code>f8:ff:c2:55:00:03</code></td>
+              <td id="client-ip-target">10.20.1.103</td>
+              <td id="client-ap-target">AP-ConfRoom-B</td>
+              <td id="client-band-target">5 GHz</td>
+              <td id="client-rssi-target">-48 dBm</td>
+              <td id="client-snr-target">48 dB</td>
+              <td id="client-rate-target">1201 Mbps</td>
+              <td id="client-retry-target">1.5%</td>
+              <td id="client-status-target"><span class="badge badge-green">Optimal</span></td>
+            </tr>
+            <tr>
+              <td>iPhone-15-Guest</td>
+              <td><code>3c:22:fb:44:00:02</code></td>
+              <td>10.20.1.102</td>
+              <td>AP-Lobby-Main</td>
+              <td>5 GHz</td>
+              <td>-58 dBm</td>
+              <td>38 dB</td>
+              <td>866 Mbps</td>
+              <td>2.1%</td>
+              <td><span class="badge badge-green">Healthy</span></td>
+            </tr>
+            <tr>
+              <td>iPad-Pro-Design</td>
+              <td><code>70:3a:cb:77:00:04</code></td>
+              <td>10.20.1.104</td>
+              <td>AP-Engineering-Lab</td>
+              <td>5 GHz</td>
+              <td>-50 dBm</td>
+              <td>46 dB</td>
+              <td>1201 Mbps</td>
+              <td>0.9%</td>
+              <td><span class="badge badge-green">Healthy</span></td>
+            </tr>
+            <tr>
+              <td>Pixel-8-QA</td>
+              <td><code>88:66:5a:88:00:05</code></td>
+              <td>10.20.1.105</td>
+              <td>AP-Engineering-Lab</td>
+              <td>5 GHz</td>
+              <td>-55 dBm</td>
+              <td>41 dB</td>
+              <td>1201 Mbps</td>
+              <td>1.8%</td>
+              <td><span class="badge badge-green">Healthy</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TAB 2: Visual RF & Campus Floorplan -->
+    <section class="tab-pane" id="pane-floorplan">
+      <div class="floorplan-container">
+        <div class="floorplan-toolbar">
+          <button class="btn btn-primary" onclick="runAirMatch()">⚡ Run Arooba AirMatch (RF Auto-Tune)</button>
+          <button class="btn" onclick="scanWidsThreats()">🛡️ Scan WIDS Threats</button>
+          <button class="btn" onclick="switchTab('uxi'); runUxiProbe();">🧪 Run Synthetic UXI Probe</button>
+        </div>
+
+        <!-- SVG Architectural Blueprint Floorplan -->
+        <svg viewBox="0 0 900 520" style="width:100%; height:auto; background:#0b0e14; border-radius:8px; border:1px solid #30363d;">
+          <!-- Definitions: Gradients & Patterns -->
+          <defs>
+            <radialGradient id="rf-green" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#2ea043" stop-opacity="0.45"/>
+              <stop offset="60%" stop-color="#2ea043" stop-opacity="0.12"/>
+              <stop offset="100%" stop-color="#2ea043" stop-opacity="0"/>
+            </radialGradient>
+            <radialGradient id="rf-orange" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#ff8300" stop-opacity="0.55"/>
+              <stop offset="70%" stop-color="#ff8300" stop-opacity="0.18"/>
+              <stop offset="100%" stop-color="#ff8300" stop-opacity="0"/>
+            </radialGradient>
+            <radialGradient id="rf-red" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#f85149" stop-opacity="0.6"/>
+              <stop offset="70%" stop-color="#f85149" stop-opacity="0.2"/>
+              <stop offset="100%" stop-color="#f85149" stop-opacity="0"/>
+            </radialGradient>
+            <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
+              <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#161b22" stroke-width="0.8"/>
+            </pattern>
+          </defs>
+
+          <!-- Background Grid -->
+          <rect width="900" height="520" fill="url(#grid)" />
+
+          <!-- Zone 1: Lounge & Cafeteria -->
+          <rect x="20" y="20" width="280" height="230" fill="#131722" stroke="#30363d" stroke-width="1.5" rx="4"/>
+          <text x="35" y="45" fill="#8b949e" font-size="12" font-weight="600">ZONE 1: LOUNGE & CAFETERIA</text>
+          <text x="35" y="62" fill="#58a6ff" font-size="10">802.11ax Public / Guest</text>
+
+          <!-- Zone 2: Main Lobby -->
+          <rect x="20" y="270" width="280" height="230" fill="#131722" stroke="#30363d" stroke-width="1.5" rx="4"/>
+          <text x="35" y="295" fill="#8b949e" font-size="12" font-weight="600">ZONE 2: MAIN LOBBY & RECEPTION</text>
+          <text x="35" y="312" fill="#3fb950" font-size="10">Ground Floor Entrance • High Foot-Traffic</text>
+
+          <!-- Zone 3: Executive Conf Room B -->
+          <rect x="320" y="20" width="260" height="230" fill="#131722" stroke="#30363d" stroke-width="1.5" rx="4" id="zone-conf-rect"/>
+          <text x="335" y="45" fill="#8b949e" font-size="12" font-weight="600">ZONE 3: EXECUTIVE CONF ROOM B</text>
+          <text x="335" y="62" fill="#8957e5" font-size="10">Ultra HD Video Conferencing & Zoom UCC</text>
+
+          <!-- Zone 4: Collaboration Atrium -->
+          <rect x="320" y="270" width="260" height="230" fill="#131722" stroke="#30363d" stroke-width="1.5" rx="4"/>
+          <text x="335" y="295" fill="#8b949e" font-size="12" font-weight="600">ZONE 4: COLLABORATION ATRIUM</text>
+          <text x="335" y="312" fill="#8b949e" font-size="10">Open Seating & Hot Desks</text>
+
+          <!-- Zone 5: Engineering & QA Lab -->
+          <rect x="600" y="20" width="280" height="480" fill="#131722" stroke="#30363d" stroke-width="1.5" rx="4"/>
+          <text x="615" y="45" fill="#8b949e" font-size="12" font-weight="600">ZONE 5: ENGINEERING & QA LAB</text>
+          <text x="615" y="62" fill="#ff8300" font-size="10">High-Density Wi-Fi 6E (6GHz / 160MHz)</text>
+
+          <!-- RF Radiation Heatmaps -->
+          <!-- AP 1 RF: Lobby (160, 385) -->
+          <circle cx="160" cy="385" r="140" fill="url(#rf-green)" id="rf-ap1"/>
+          <!-- AP 2 RF: Conf Room B (450, 135) -->
+          <circle cx="450" cy="135" r="140" fill="url(#rf-green)" id="rf-ap2"/>
+          <!-- AP 3 RF: Eng Lab (740, 260) -->
+          <circle cx="740" cy="260" r="150" fill="url(#rf-green)" id="rf-ap3"/>
+
+          <!-- Dynamic Sticky Client Roam Vector (hidden by default) -->
+          <g id="sticky-vector-group" style="display:none;">
+            <line x1="160" y1="385" x2="430" y2="180" stroke="#f85149" stroke-width="3" stroke-dasharray="6,4"/>
+            <circle cx="430" cy="180" r="16" fill="#da3633" opacity="0.3"/>
+            <text x="260" y="270" fill="#f85149" font-size="11" font-weight="bold" transform="rotate(-38 260 270)">
+              ⚠️ STICKY CLIENT ROAM VECTOR (-83 dBm)
+            </text>
+          </g>
+
+          <!-- Rogue AP Threat Box (hidden by default) -->
+          <g id="rogue-ap-group" style="display:none;">
+            <circle cx="530" cy="80" r="45" fill="url(#rf-red)"/>
+            <circle cx="530" cy="80" r="12" fill="#da3633"/>
+            <text x="530" y="84" fill="#fff" font-size="12" text-anchor="middle">☠️</text>
+            <rect x="460" y="105" width="140" height="32" rx="4" fill="#2d1515" stroke="#f85149" stroke-width="1"/>
+            <text x="530" y="120" fill="#f85149" font-size="10" font-weight="bold" text-anchor="middle">ROGUE AP DETECTED</text>
+            <text x="530" y="132" fill="#ff7b72" font-size="9" text-anchor="middle">BSSID: 00:11:22:33:44:55</text>
+          </g>
+
+          <!-- AP 1: Lobby Marker -->
+          <g transform="translate(160, 385)">
+            <circle r="14" fill="#1f6feb" stroke="#fff" stroke-width="2"/>
+            <circle r="6" fill="#fff"/>
+            <rect x="-65" y="22" width="130" height="34" rx="4" fill="#0d1117" stroke="#30363d" stroke-width="1"/>
+            <text x="0" y="37" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">AP-Lobby-Main</text>
+            <text x="0" y="50" fill="#3fb950" font-size="9" text-anchor="middle">Ch 1 (2.4G) | Ch 36 (5G)</text>
+          </g>
+
+          <!-- AP 2: Conf Room B Marker -->
+          <g transform="translate(450, 135)" id="ap2-marker">
+            <circle r="14" fill="#1f6feb" stroke="#fff" stroke-width="2"/>
+            <circle r="6" fill="#fff"/>
+            <rect x="-65" y="22" width="130" height="34" rx="4" fill="#0d1117" stroke="#30363d" stroke-width="1"/>
+            <text x="0" y="37" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">AP-ConfRoom-B</text>
+            <text x="0" y="50" fill="#3fb950" font-size="9" text-anchor="middle" id="ap2-ch-label">Ch 6 (2.4G) | Ch 149 (5G)</text>
+          </g>
+
+          <!-- AP 3: Eng Lab Marker -->
+          <g transform="translate(740, 260)">
+            <circle r="14" fill="#1f6feb" stroke="#fff" stroke-width="2"/>
+            <circle r="6" fill="#fff"/>
+            <rect x="-65" y="22" width="130" height="34" rx="4" fill="#0d1117" stroke="#30363d" stroke-width="1"/>
+            <text x="0" y="37" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">AP-Engineering-Lab</text>
+            <text x="0" y="50" fill="#3fb950" font-size="9" text-anchor="middle">Ch 11 (2.4G) | Ch 44 (5G)</text>
+          </g>
+
+          <!-- UXI Probe Sensor in Zone 3 -->
+          <g transform="translate(520, 45)">
+            <rect x="-5" y="-5" width="55" height="24" rx="12" fill="#8957e5" opacity="0.3"/>
+            <circle cx="6" cy="7" r="5" fill="#a371f7"/>
+            <text x="18" y="11" fill="#fff" font-size="9" font-weight="bold">UXI Sensor</text>
+          </g>
+
+          <!-- Client Stations -->
+          <g transform="translate(100, 430)">
+            <circle r="8" fill="#238636" stroke="#fff" stroke-width="1.5"/>
+            <text x="0" y="18" fill="#8b949e" font-size="9" text-anchor="middle">Sales-Laptop (-52dBm)</text>
+          </g>
+          <g transform="translate(220, 430)">
+            <circle r="8" fill="#238636" stroke="#fff" stroke-width="1.5"/>
+            <text x="0" y="18" fill="#8b949e" font-size="9" text-anchor="middle">iPhone-Guest (-58dBm)</text>
+          </g>
+          <g transform="translate(430, 180)" id="exec-laptop-marker">
+            <circle r="8" fill="#238636" stroke="#fff" stroke-width="1.5" id="exec-laptop-dot"/>
+            <text x="0" y="18" fill="#8b949e" font-size="9" text-anchor="middle" id="exec-laptop-label">Exec-Zoom (-48dBm)</text>
+          </g>
+          <g transform="translate(680, 220)">
+            <circle r="8" fill="#238636" stroke="#fff" stroke-width="1.5"/>
+            <text x="0" y="18" fill="#8b949e" font-size="9" text-anchor="middle">iPad-Design (-50dBm)</text>
+          </g>
+          <g transform="translate(800, 310)">
+            <circle r="8" fill="#238636" stroke="#fff" stroke-width="1.5"/>
+            <text x="0" y="18" fill="#8b949e" font-size="9" text-anchor="middle">Pixel-QA (-55dBm)</text>
+          </g>
+        </svg>
+      </div>
+    </section>
+
+    <!-- TAB 3: Synthetic UXI & App QoE -->
+    <section class="tab-pane" id="pane-uxi">
+      <div class="table-card">
+        <div class="table-title">🧪 Synthetic User Experience Insight (UXI) Probe Sensor</div>
+        <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:14px;">
+          Autonomous client lifecycle journey sensor (Montreal HQ Floor 2 - Conf Room B)
+        </div>
+
+        <div class="uxi-phases">
+          <div class="uxi-card">
+            <div class="uxi-step">1. Assoc Link</div>
+            <div class="uxi-val" id="uxi-step1">11.2 ms</div>
+            <div class="uxi-status"><span class="badge badge-green" id="badge-step1">Passed</span></div>
+          </div>
+          <div class="uxi-card">
+            <div class="uxi-step">2. 802.1X Auth</div>
+            <div class="uxi-val" id="uxi-step2">22.4 ms</div>
+            <div class="uxi-status"><span class="badge badge-green" id="badge-step2">Passed</span></div>
+          </div>
+          <div class="uxi-card" id="card-step3">
+            <div class="uxi-step">3. DHCP DORA</div>
+            <div class="uxi-val" id="uxi-step3">34.8 ms</div>
+            <div class="uxi-status"><span class="badge badge-green" id="badge-step3">Passed</span></div>
+          </div>
+          <div class="uxi-card">
+            <div class="uxi-step">4. DNS Query</div>
+            <div class="uxi-val" id="uxi-step4">6.2 ms</div>
+            <div class="uxi-status"><span class="badge badge-green" id="badge-step4">Passed</span></div>
+          </div>
+          <div class="uxi-card">
+            <div class="uxi-step">5. Gateway RTT</div>
+            <div class="uxi-val" id="uxi-step5">1.7 ms</div>
+            <div class="uxi-status"><span class="badge badge-green" id="badge-step5">Passed</span></div>
+          </div>
+          <div class="uxi-card">
+            <div class="uxi-step">6. Cloud HTTP</div>
+            <div class="uxi-val" id="uxi-step6">28.6 ms</div>
+            <div class="uxi-status"><span class="badge badge-green" id="badge-step6">Passed</span></div>
+          </div>
+          <div class="uxi-card">
+            <div class="uxi-step">7. Throughput</div>
+            <div class="uxi-val" id="uxi-step7">520 Mbps</div>
+            <div class="uxi-status"><span class="badge badge-green" id="badge-step7">Passed</span></div>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" style="width:auto;" onclick="runUxiProbe()">🔄 Re-run Synthetic UXI Probe</button>
+      </div>
+
+      <!-- Zoom / UCC QoE Table -->
+      <div class="table-card">
+        <div class="table-title">📹 Unified Communications & Collaboration (UCC / AppRF) Quality</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Station Hostname</th>
+              <th>MAC Address</th>
+              <th>Zoom MOS Score</th>
+              <th>Zoom Jitter</th>
+              <th>Packet Loss</th>
+              <th>Call Experience</th>
+              <th>Teams MOS</th>
+              <th>Active App</th>
+            </tr>
+          </thead>
+          <tbody id="ucc-table-body">
+            <tr id="row-ucc-target">
+              <td>MacBook-Exec-Zoom</td>
+              <td><code>f8:ff:c2:55:00:03</code></td>
+              <td id="ucc-mos"><strong>4.4 / 5.0</strong></td>
+              <td id="ucc-jitter">4.1 ms</td>
+              <td id="ucc-loss">0.2%</td>
+              <td id="ucc-exp"><span class="badge badge-green">Excellent</span></td>
+              <td>4.3 / 5.0</td>
+              <td>Zoom Video Conference (1080p)</td>
+            </tr>
+            <tr>
+              <td>MacBookPro-Sales</td>
+              <td><code>a4:83:e7:10:00:01</code></td>
+              <td>4.5 / 5.0</td>
+              <td>3.8 ms</td>
+              <td>0.1%</td>
+              <td><span class="badge badge-green">Excellent</span></td>
+              <td>4.4 / 5.0</td>
+              <td>Google Meet HD</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TAB 4: Autonomous AI Copilot Console -->
+    <section class="tab-pane" id="pane-agent">
+      <div class="agent-ticket-box">
+        <div style="font-size:1.1rem; font-weight:700; color:var(--text-main);">
+          🤖 Autonomous Wi-Fi Incident Investigation & Self-Healing
+        </div>
+        <div style="font-size:0.85rem; color:var(--text-muted);">
+          Submit an incident ticket or diagnostic query. The AI Copilot investigates RF telemetry, executes diagnostic tools, determines definitive RCA, and triggers closed-loop auto-remediation.
+        </div>
+
+        <div>
+          <label style="font-size:0.8rem; color:var(--text-muted); font-weight:600; display:block; margin-bottom:6px;">
+            Support Ticket / Diagnostic Query:
+          </label>
+          <textarea id="agent-ticket-input" rows="3">Users in Conference Room B are complaining that Zoom calls keep dropping and latency is terrible.</textarea>
+        </div>
+
+        <div style="display:flex; gap:12px; align-items:center;">
+          <button class="btn btn-primary" id="btn-run-agent" style="width:240px;" onclick="runAgentInvestigation()">
+            🚀 Run AIOps Agent
+          </button>
+          <span style="font-size:0.8rem; color:var(--text-muted);">
+            Reasoning Engine: <strong>Deterministic Expert Engine (Offline / Instant)</strong>
+          </span>
+        </div>
+      </div>
+
+      <!-- Real-Time Trace Log -->
+      <div class="trace-container" id="agent-trace-box">
+        <div style="font-size:0.95rem; font-weight:700; margin-bottom:12px; color:var(--text-main);">
+          🛠️ Diagnostic Orchestrator Tool Calls & Reasoning Trace
+        </div>
+        <div id="trace-steps-list"></div>
+      </div>
+
+      <!-- Root Cause Analysis Report -->
+      <div class="report-box" id="agent-report-box">
+        <h3 id="report-title">📋 Definitive Root Cause Analysis (RCA)</h3>
+        <div id="report-content" style="font-size:0.9rem; line-height:1.6; color:#e6edf3;"></div>
+
+        <div class="remediation-box" id="remediation-container">
+          <div>
+            <div style="font-weight:700; color:var(--accent-orange);" id="rem-action-title">
+              ⚡ Closed-Loop Autonomous Remediation Available
+            </div>
+            <div style="font-size:0.8rem; color:var(--text-muted);" id="rem-action-desc">
+              Issue 802.11v BSS Transition Management frame to steer station to AP-ConfRoom-B.
+            </div>
+          </div>
+          <button class="btn btn-success" style="width:auto;" id="btn-apply-rem" onclick="applyRemediation()">
+            Apply Remediation Now
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Interactive Toast -->
+  <div class="toast" id="toast-msg"></div>
+
+  <script>
+    // Global State
+    let currentScenario = 'baseline';
+    let currentMode = 'simulated';
+    let isPolling = true;
+
+    const SCENARIOS = {
+      baseline: {
+        name: "Healthy Baseline",
+        prompt: "Perform campus-wide RF baseline check and survey station airtime health.",
+        util: "23.9%",
+        dhcp: "17.7%",
+        sticky: false,
+        rogue: false,
+        zoom_issue: false,
+        ap2_util: "24.0%",
+        ap2_ch: "Ch 149 (80MHz)",
+        ap2_color: "#2ea043",
+        client_ap: "AP-ConfRoom-B",
+        client_rssi: "-48 dBm",
+        client_snr: "48 dB",
+        client_rate: "1201 Mbps",
+        client_retry: "1.5%",
+        client_status: "Optimal",
+        mos: "4.4 / 5.0",
+        jitter: "4.1 ms",
+        loss: "0.2%",
+        uxi3: "34.8 ms",
+        uxi3_status: "Passed",
+        rca: `<strong>Incident Evaluation:</strong> Telemetry audit completed successfully across all 3 campus access points.<br>
+              • <strong>Channel Utilization:</strong> Optimal (< 30% airtime utilization).<br>
+              • <strong>Station RF Links:</strong> SNR > 35 dB, retry rates < 2.5%.<br>
+              • <strong>Conclusion:</strong> Network is operating within nominal SLAs. No remediation needed.`
+      },
+      sticky_client: {
+        name: "Sticky Client Roaming Drop",
+        prompt: "Users in Conference Room B are complaining that Zoom calls keep dropping and latency is terrible.",
+        util: "26.4%",
+        dhcp: "17.7%",
+        sticky: true,
+        rogue: false,
+        zoom_issue: true,
+        ap2_util: "24.0%",
+        ap2_ch: "Ch 149 (80MHz)",
+        ap2_color: "#2ea043",
+        client_ap: "AP-Lobby-Main (Distance 45m)",
+        client_rssi: "-83 dBm",
+        client_snr: "11 dB",
+        client_rate: "54 Mbps",
+        client_retry: "28.4%",
+        client_status: "Critical (Sticky)",
+        mos: "2.3 / 5.0",
+        jitter: "46.2 ms",
+        loss: "12.8%",
+        uxi3: "35.2 ms",
+        uxi3_status: "Passed",
+        rca: `<strong>Definitive Root Cause:</strong> <code>Sticky Client Syndrome</code>.<br>
+              • Station <code>f8:ff:c2:55:00:03</code> walked into Conference Room B but refused to roam, remaining associated to distant <code>AP-Lobby-Main</code> at <strong>-83 dBm RSSI</strong> (SNR 11 dB).<br>
+              • Meanwhile, nearby access point <code>AP-ConfRoom-B</code> offers pristine <strong>-46 dBm RSSI</strong> on 5 GHz Ch 149.<br>
+              • <strong>Packet Impact:</strong> 802.11 frame retries spiked to 28.4%, causing Zoom jitter buffer exhaustion and video call packet drops.`,
+        remediation: "Issue 802.11v BSS Transition Management steering frame to migrate client to AP-ConfRoom-B."
+      },
+      channel_congestion: {
+        name: "Co-Channel Interference (CCI)",
+        prompt: "Wi-Fi is running extremely sluggish on AP-ConfRoom-B despite sitting right next to the access point.",
+        util: "68.5%",
+        dhcp: "17.7%",
+        sticky: false,
+        rogue: false,
+        zoom_issue: true,
+        ap2_util: "91.4%",
+        ap2_ch: "Ch 6 (20MHz Congested)",
+        ap2_color: "#da3633",
+        client_ap: "AP-ConfRoom-B",
+        client_rssi: "-50 dBm",
+        client_snr: "18 dB",
+        client_rate: "144 Mbps",
+        client_retry: "34.1%",
+        client_status: "Degraded (CCI)",
+        mos: "2.1 / 5.0",
+        jitter: "58.4 ms",
+        loss: "15.3%",
+        uxi3: "48.2 ms",
+        uxi3_status: "Passed",
+        rca: `<strong>Definitive Root Cause:</strong> Severe <code>Co-Channel Interference (CCI)</code>.<br>
+              • <code>AP-ConfRoom-B</code> airtime utilization surged to <strong>91.4%</strong> due to co-channel overlap and non-Wi-Fi RF noise.<br>
+              • Clear Channel Assessment (CCA) backoff prevents timely transmission, causing massive frame queueing and latency spikes.`,
+        remediation: "Execute Dynamic Channel Switch Announcement (CSA) to migrate AP-ConfRoom-B to clean DFS channel 100."
+      },
+      dhcp_exhaustion: {
+        name: "DHCP Scope Exhaustion",
+        prompt: "New guests in Conference Room B cannot connect to the Wi-Fi. Devices are stuck acquiring an IP address.",
+        util: "24.1%",
+        dhcp: "100.0%",
+        sticky: false,
+        rogue: false,
+        zoom_issue: false,
+        ap2_util: "24.0%",
+        ap2_ch: "Ch 149 (80MHz)",
+        ap2_color: "#2ea043",
+        client_ap: "AP-ConfRoom-B",
+        client_rssi: "-48 dBm",
+        client_snr: "48 dB",
+        client_rate: "1201 Mbps",
+        client_retry: "1.2%",
+        client_status: "No IP (DHCP Timeout)",
+        mos: "4.4 / 5.0",
+        jitter: "4.2 ms",
+        loss: "0.1%",
+        uxi3: "TIMEOUT (999ms)",
+        uxi3_status: "Failed",
+        rca: `<strong>Definitive Root Cause:</strong> <code>DHCP Scope Exhaustion</code> (Silent IP Starvation).<br>
+              • DHCP pool <code>10.20.1.0/24</code> has allocated all 250 available leases (100% capacity).<br>
+              • Stations complete 802.11 Open Authentication and 4-way WPA2 handshake, but fail at DHCP DORA stage (<code>DHCP_DISCOVER_TIMEOUT</code>).`,
+        remediation: "Purge 142 expired stale DHCP leases and expand active lease pool subnet."
+      },
+      evil_twin_attack: {
+        name: "Rogue AP / Evil Twin Threat",
+        prompt: "WIDS security alert: Unauthorized rogue BSSID detected broadcasting corporate SSID in Conference Room B. Scan threats and contain.",
+        util: "25.2%",
+        dhcp: "17.7%",
+        sticky: false,
+        rogue: true,
+        zoom_issue: false,
+        ap2_util: "24.0%",
+        ap2_ch: "Ch 149 (80MHz)",
+        ap2_color: "#2ea043",
+        client_ap: "AP-ConfRoom-B",
+        client_rssi: "-48 dBm",
+        client_snr: "48 dB",
+        client_rate: "1201 Mbps",
+        client_retry: "1.2%",
+        client_status: "Threat In Vicinity",
+        mos: "4.4 / 5.0",
+        jitter: "4.1 ms",
+        loss: "0.2%",
+        uxi3: "34.5 ms",
+        uxi3_status: "Passed",
+        rca: `<strong>Definitive Root Cause:</strong> <code>WIDS Rogue AP / Evil Twin Attack</code>.<br>
+              • Unauthorized BSSID <code>00:11:22:33:44:55</code> detected in Conference Room B spoofing corporate SSID <code>Arooba-Corp-Secure</code>.<br>
+              • Attacker is attempting Wi-Fi credential harvesting and credential-relay attacks on corporate stations.`,
+        remediation: "Initiate automated RFProtect 802.11 Deauthentication airtime containment."
+      },
+      zoom_audio_jitter: {
+        name: "Zoom QoE & Audio Jitter",
+        prompt: "Executive Zoom meeting in Conference Room B is glitching with robotic voice and choppy audio. Investigate QoE and restore MOS score.",
+        util: "24.5%",
+        dhcp: "17.7%",
+        sticky: false,
+        rogue: false,
+        zoom_issue: true,
+        ap2_util: "24.0%",
+        ap2_ch: "Ch 149 (80MHz)",
+        ap2_color: "#2ea043",
+        client_ap: "AP-ConfRoom-B",
+        client_rssi: "-52 dBm",
+        client_snr: "38 dB",
+        client_rate: "866 Mbps",
+        client_retry: "14.2%",
+        client_status: "High Jitter",
+        mos: "2.1 / 5.0",
+        jitter: "54.8 ms",
+        loss: "8.6%",
+        uxi3: "34.8 ms",
+        uxi3_status: "Passed",
+        rca: `<strong>Definitive Root Cause:</strong> <code>AppRF DSCP Queueing Starvation</code>.<br>
+              • Zoom UDP RTP video packets were erroneously tagged with Best Effort (BE) instead of Voice (AC_VO / DSCP 46 EF).<br>
+              • Contention window collision resulted in jitter buffer overflow (54.8 ms) and robotic voice cutouts (MOS degraded to 2.1).`,
+        remediation: "Apply Layer-7 AppRF QoS Priority policy: re-classify Zoom traffic to 802.11e AC_VO."
+      },
+      campus_rf_conflict: {
+        name: "Multi-AP Co-Channel Conflict",
+        prompt: "Campus-wide sluggishness reported across multiple floors due to channel overlaps. Re-optimize the RF channel plan using AirMatch.",
+        util: "55.4%",
+        dhcp: "17.7%",
+        sticky: false,
+        rogue: false,
+        zoom_issue: true,
+        ap2_util: "62.0%",
+        ap2_ch: "Ch 6 (Conflicting)",
+        ap2_color: "#ff8300",
+        client_ap: "AP-ConfRoom-B",
+        client_rssi: "-52 dBm",
+        client_snr: "22 dB",
+        client_rate: "300 Mbps",
+        client_retry: "22.5%",
+        client_status: "RF Conflict",
+        mos: "2.8 / 5.0",
+        jitter: "32.1 ms",
+        loss: "5.4%",
+        uxi3: "41.0 ms",
+        uxi3_status: "Passed",
+        rca: `<strong>Definitive Root Cause:</strong> <code>Campus RF Channel Overlap</code>.<br>
+              • Multiple APs configured on identical 2.4 and 5 GHz channels without power balancing.<br>
+              • Co-Channel Interference radius covers entire 2nd floor, inducing 22.5% frame retry rate.`,
+        remediation: "Execute Arooba AirMatch graph-coloring constraint solver to synthesize an orthogonal campus channel plan."
+      }
+    };
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast-msg');
+      toast.innerText = msg;
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 3500);
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+      const activeBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.innerText.toLowerCase().includes(tabId));
+      if (activeBtn) activeBtn.classList.add('active');
+      const pane = document.getElementById(`pane-${tabId}`);
+      if (pane) pane.classList.add('active');
+    }
+
+    function setMode(mode) {
+      currentMode = mode;
+      document.getElementById('radio-sim').classList.toggle('active', mode === 'simulated');
+      document.getElementById('radio-edge').classList.toggle('active', mode === 'hardware');
+      const badge = document.getElementById('mode-status-box');
+      if (mode === 'hardware') {
+        badge.innerHTML = "🍓 Connected to Raspberry Pi 5 AP (Broadcom wlan0)";
+        badge.style.color = "#ff8300";
+        badge.style.borderColor = "rgba(255, 131, 0, 0.4)";
+        badge.style.background = "rgba(255, 131, 0, 0.1)";
+        document.getElementById('val-ap-count').innerText = "1";
+        document.getElementById('scenario-section').style.opacity = "0.4";
+        showToast("Switched to Physical Edge (Raspberry Pi 5) Mode");
+      } else {
+        badge.innerHTML = "💻 Running Multi-AP In-Memory Simulation";
+        badge.style.color = "var(--color-green-light)";
+        badge.style.borderColor = "rgba(63, 185, 80, 0.3)";
+        badge.style.background = "rgba(35, 134, 54, 0.15)";
+        document.getElementById('val-ap-count').innerText = "3";
+        document.getElementById('scenario-section').style.opacity = "1";
+        showToast("Switched to Virtual Campus Simulation Mode");
+      }
+    }
+
+    function previewScenario() {
+      const select = document.getElementById('scenario-select');
+      const sc = SCENARIOS[select.value];
+      if (sc) {
+        document.getElementById('agent-ticket-input').value = sc.prompt;
+      }
+    }
+
+    function applySelectedScenario() {
+      const select = document.getElementById('scenario-select');
+      const scKey = select.value;
+      currentScenario = scKey;
+      const sc = SCENARIOS[scKey];
+
+      // Update Telemetry Metrics
+      document.getElementById('val-avg-util').innerText = sc.util;
+      document.getElementById('val-dhcp-usage').innerText = sc.dhcp;
+      document.getElementById('agent-ticket-input').value = sc.prompt;
+
+      const utilVal = parseFloat(sc.util);
+      const cardUtil = document.getElementById('card-util');
+      const deltaUtil = document.getElementById('delta-util');
+      if (utilVal > 50) {
+        cardUtil.className = "metric-card red-accent";
+        deltaUtil.className = "metric-delta delta-red";
+        deltaUtil.innerText = "↓ Congested";
+      } else {
+        cardUtil.className = "metric-card";
+        deltaUtil.className = "metric-delta delta-green";
+        deltaUtil.innerText = "↑ Optimal";
+      }
+
+      // Update Conf Room AP
+      document.getElementById('util-conf').innerText = sc.ap2_util;
+      document.getElementById('ch-conf-5').innerText = sc.ap2_ch;
+
+      // Update Client Target
+      document.getElementById('client-ap-target').innerText = sc.client_ap;
+      document.getElementById('client-rssi-target').innerText = sc.client_rssi;
+      document.getElementById('client-snr-target').innerText = sc.client_snr;
+      document.getElementById('client-rate-target').innerText = sc.client_rate;
+      document.getElementById('client-retry-target').innerText = sc.client_retry;
+      const statusBadge = document.getElementById('client-status-target');
+      if (sc.sticky || sc.zoom_issue) {
+        statusBadge.innerHTML = `<span class="badge badge-red">${sc.client_status}</span>`;
+      } else {
+        statusBadge.innerHTML = `<span class="badge badge-green">${sc.client_status}</span>`;
+      }
+
+      // Floorplan Vectors
+      document.getElementById('sticky-vector-group').style.display = sc.sticky ? 'block' : 'none';
+      document.getElementById('rogue-ap-group').style.display = sc.rogue ? 'block' : 'none';
+
+      // UXI
+      document.getElementById('uxi-step3').innerText = sc.uxi3;
+      const b3 = document.getElementById('badge-step3');
+      if (sc.uxi3_status === 'Failed') {
+        b3.className = "badge badge-red";
+        b3.innerText = "Failed (Exhausted)";
+      } else {
+        b3.className = "badge badge-green";
+        b3.innerText = "Passed";
+      }
+
+      // UCC
+      document.getElementById('ucc-mos').innerHTML = `<strong>${sc.mos}</strong>`;
+      document.getElementById('ucc-jitter').innerText = sc.jitter;
+      document.getElementById('ucc-loss').innerText = sc.loss;
+      const uccExp = document.getElementById('ucc-exp');
+      if (parseFloat(sc.mos) < 3.0) {
+        uccExp.innerHTML = `<span class="badge badge-red">Degraded</span>`;
+      } else {
+        uccExp.innerHTML = `<span class="badge badge-green">Excellent</span>`;
+      }
+
+      // Reset Agent Trace
+      document.getElementById('agent-trace-box').style.display = 'none';
+      document.getElementById('agent-report-box').style.display = 'none';
+
+      showToast(`Injected Scenario: ${sc.name}`);
+    }
+
+    function runAgentInvestigation() {
+      const btn = document.getElementById('btn-run-agent');
+      btn.innerHTML = `⏳ Investigating...`;
+      btn.disabled = true;
+
+      const sc = SCENARIOS[currentScenario];
+      const traceBox = document.getElementById('agent-trace-box');
+      const traceList = document.getElementById('trace-steps-list');
+      const reportBox = document.getElementById('agent-report-box');
+      traceBox.style.display = 'block';
+      reportBox.style.display = 'none';
+      traceList.innerHTML = '';
+
+      const steps = [
+        {
+          title: "Step 1: Tool `list_connected_clients`",
+          summary: "Surveyed 5 active station(s) on WLAN.",
+          data: JSON.stringify([
+            { hostname: "MacBookPro-Sales", mac: "a4:83:e7:10:00:01", rssi_dbm: -52, ap: "AP-Lobby-Main" },
+            { hostname: "MacBook-Exec-Zoom", mac: "f8:ff:c2:55:00:03", rssi_dbm: parseInt(sc.client_rssi), ap: sc.client_ap },
+            { hostname: "iPhone-15-Guest", mac: "3c:22:fb:44:00:02", rssi_dbm: -58, ap: "AP-Lobby-Main" }
+          ], null, 2)
+        },
+        {
+          title: "Step 2: Tool `get_client_telemetry`",
+          summary: `Station f8:ff:c2:55:00:03 telemetry analysis: RSSI ${sc.client_rssi}, retries ${sc.client_retry}.`,
+          data: JSON.stringify({
+            target_mac: "f8:ff:c2:55:00:03",
+            rssi_dbm: sc.client_rssi,
+            snr_db: sc.client_snr,
+            phy_bitrate: sc.client_rate,
+            retry_rate_pct: sc.client_retry,
+            sticky_client: sc.sticky
+          }, null, 2)
+        },
+        {
+          title: "Step 3: Tool `get_ap_rf_health`",
+          summary: `Queried AP-ConfRoom-B RF health: Airtime util ${sc.ap2_util}.`,
+          data: JSON.stringify({
+            ap_name: "AP-ConfRoom-B",
+            channel_utilization_pct: sc.ap2_util,
+            channel_24ghz: 6,
+            channel_5ghz: 149,
+            connected_clients: 1
+          }, null, 2)
+        },
+        {
+          title: "Step 4: Tool `check_network_services`",
+          summary: `DHCP Pool Usage: ${sc.dhcp}, DNS RTT: 8.2ms.`,
+          data: JSON.stringify({
+            dhcp_pool_total: 250,
+            dhcp_pool_active: sc.dhcp === "100.0%" ? 250 : 44,
+            dhcp_pool_utilization_pct: sc.dhcp,
+            dns_latency_ms: 8.2
+          }, null, 2)
+        }
+      ];
+
+      let idx = 0;
+      function showNextStep() {
+        if (idx < steps.length) {
+          const s = steps[idx];
+          const div = document.createElement('div');
+          div.className = 'trace-step';
+          div.innerHTML = `
+            <div class="trace-title">${s.title} — <em>${s.summary}</em></div>
+            <div class="trace-code">${s.data}</div>
+          `;
+          traceList.appendChild(div);
+          idx++;
+          setTimeout(showNextStep, 500);
+        } else {
+          btn.innerHTML = `🚀 Run AIOps Agent`;
+          btn.disabled = false;
+          // Render final report
+          reportBox.style.display = 'block';
+          document.getElementById('report-content').innerHTML = sc.rca;
+          if (sc.remediation) {
+            document.getElementById('remediation-container').style.display = 'flex';
+            document.getElementById('rem-action-desc').innerText = sc.remediation;
+          } else {
+            document.getElementById('remediation-container').style.display = 'none';
+          }
+          showToast("AI Investigation Completed!");
+        }
+      }
+
+      setTimeout(showNextStep, 400);
+    }
+
+    function applyRemediation() {
+      showToast("⚡ Autonomous Remediation Successfully Applied!");
+      document.getElementById('scenario-select').value = 'baseline';
+      applySelectedScenario();
+      document.getElementById('remediation-container').style.display = 'none';
+    }
+
+    function runAirMatch() {
+      showToast("⚡ Arooba AirMatch: Synthesized Orthogonal Channel Plan!");
+      document.getElementById('ch-conf-5').innerText = "Ch 100 (DFS 80MHz)";
+      document.getElementById('ap2-ch-label').innerText = "Ch 1 (2.4G) | Ch 100 (5G)";
+      document.getElementById('val-avg-util').innerText = "19.2%";
+    }
+
+    function scanWidsThreats() {
+      const rogue = document.getElementById('rogue-ap-group');
+      rogue.style.display = 'block';
+      showToast("🛡️ WIDS Scan: Unauthorized Rogue AP Detected in Zone 3!");
+    }
+
+    function runUxiProbe() {
+      showToast("🧪 Synthetic UXI: Probe completed across 7 phases!");
+      document.getElementById('uxi-step1').innerText = "9.8 ms";
+      document.getElementById('uxi-step2').innerText = "18.2 ms";
+      document.getElementById('uxi-step4').innerText = "5.4 ms";
+      document.getElementById('uxi-step5').innerText = "1.2 ms";
+    }
+
+    function toggleAutoPoll() {
+      isPolling = document.getElementById('autopoll-check').checked;
+      document.getElementById('poll-clock').innerText = isPolling ?
+        "🟢 Live Stream Active • Polling every 3s" : "⏸️ Live Stream Paused";
+    }
+
+    // Live clock update
+    setInterval(() => {
+      if (!isPolling) return;
+      const now = new Date();
+      const timeStr = now.toTimeString().split(' ')[0];
+      const wanEl = document.getElementById('val-wan-latency');
+      if (wanEl && currentScenario === 'baseline') {
+        const jitter = (11 + Math.random() * 3).toFixed(1);
+        wanEl.innerText = `${jitter} ms`;
+      }
+    }, 3000);
+  </script>
+</body>
+</html>

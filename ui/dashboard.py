@@ -539,36 +539,29 @@ with tab_agent:
     with st.expander("⚙️ Agent Engine & LLM Configuration", expanded=False):
         col_prov1, col_prov2 = st.columns([1, 1])
         with col_prov1:
-            default_prov_idx = 1 if config.LLM_PROVIDER == "gemini" or bool(config.GEMINI_API_KEY) else 0
             provider_mode = st.selectbox(
                 "Reasoning Engine",
                 options=["Deterministic Expert Engine (Offline)", "Google Gemini (Autonomous Agent)"],
-                index=default_prov_idx,
+                index=0,
+                key="reasoning_engine_choice",
                 help="Choose between the built-in deterministic rule engine (100% offline) or Google Gemini via native function calling.",
             )
         
         use_gemini = "Gemini" in provider_mode
-        gemini_key_input = config.GEMINI_API_KEY
         gemini_model_input = config.GEMINI_MODEL or "gemini-3.1-flash-lite"
 
         with col_prov2:
             if use_gemini:
-                col_k1, col_k2 = st.columns([3, 2])
-                with col_k1:
-                    gemini_key_input = st.text_input(
-                        "Gemini API Key",
-                        value=config.GEMINI_API_KEY,
-                        type="password",
-                        placeholder="AIzaSy...",
-                        help="Enter your Google Gemini API key or set GEMINI_API_KEY in .env.",
-                    )
-                with col_k2:
-                    gemini_model_input = st.selectbox(
-                        "Gemini Model",
-                        options=["gemini-3.1-flash-lite", "gemini-3.8-flash", "gemini-flash-lite-latest", "gemini-3.1-pro-preview"],
-                        index=0,
-                        help="gemini-3.1-flash-lite provides fast, low-latency execution and high quota efficiency.",
-                    )
+                gemini_model_input = st.selectbox(
+                    "Gemini Model",
+                    options=["gemini-3.1-flash-lite", "gemini-3.8-flash", "gemini-flash-lite-latest", "gemini-3.1-pro-preview"],
+                    index=0,
+                    help="gemini-3.1-flash-lite provides fast, low-latency execution and high quota efficiency.",
+                )
+                if config.GEMINI_API_KEY:
+                    st.caption("🔒 *API Key configured securely via server environment (`.env`).*")
+                else:
+                    st.caption("⚠️ *`GEMINI_API_KEY` not set in `.env`. Agent will fall back to offline engine.*")
             else:
                 st.info("💡 Expert rule engine runs locally with zero external network requests or API costs.")
 
@@ -605,7 +598,6 @@ with tab_agent:
             result = aiops_agent.run_investigation(
                 user_ticket,
                 provider_override=prov_choice,
-                api_key_override=gemini_key_input,
                 model_override=gemini_model_input,
             )
 
