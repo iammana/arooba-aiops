@@ -419,7 +419,7 @@ with tab_cockpit:
 
 
 with tab_floorplan:
-    st.subheader("🗺️ Visual RF & Campus Floorplan Heatmap (Aruba VisualRF Engine)")
+    st.subheader("🗺️ Visual RF & Campus Floorplan Heatmap (VisualRF Engine)")
     st.caption("2D Spatial RF propagation modeling based on Log-Distance Path Loss. Displays live AP cells, station associations, sticky roaming vectors, and WIDS rogue detection.")
 
     # Action Toolbar
@@ -472,7 +472,7 @@ with tab_floorplan:
 
 with tab_uxi_qoe:
     st.subheader("🧪 Synthetic User Experience Insight (UXI) & AppRF Cockpit")
-    st.caption("Proactive synthetic user journey testing & Layer-7 UCC quality assurance (Competes with Aruba UXI & AppRF).")
+    st.caption("Proactive synthetic user journey testing & Layer-7 UCC quality assurance (Synthetic UXI & AppRF).")
 
     uxi_report = telemetry_client.get_uxi_sensor_status()
 

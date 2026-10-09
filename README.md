@@ -98,16 +98,16 @@ flowchart TD
 
 ---
 
-## ⚡ Key Highlights & Aruba-Competitive Feature Suite
+## ⚡ Key Highlights & Enterprise Feature Suite
 
 * **Dual-Mode Deployment:**
   * **Simulation Mode:** Pre-loaded multi-AP campus deployment. Instant evaluation on any Mac/PC with **zero hardware**.
   * **Hardware Mode (Raspberry Pi 5):** Turns a Pi 5 into an actual Wi-Fi Access Point broadcasting an SSID, running real Linux `hostapd` / `dnsmasq`, and exposing live kernel 802.11 telemetry (`iw dev wlan0 station dump`).
 * **Zero-Dependency Demo Guarantee:** Ships with an intelligent, deterministic rule engine that runs locally with **0 API keys required**, while seamlessly supporting **Google Gemini**, **OpenAI GPT-4o**, and **Anthropic Claude**.
-* **Aruba Enterprise Competitive Features:**
+* **Enterprise Features:**
   1. 📡 **Arooba AirMatch (Algorithmic RF Plan Optimizer):** Graph-coloring constraint solver that eliminates campus-wide Co-Channel Interference (CCI) by allocating orthogonal 2.4/5GHz channels and balancing radio Tx powers.
   2. 🗺️ **Visual RF & Campus Floorplan Heatmap:** 2D spatial RF canvas modeling signal propagation (Log-Distance Path Loss), AP coverage cells, live station links, sticky client roam vectors, and rogue threats.
-  3. 🧪 **Synthetic UXI Probe Engine (Aruba UXI Equivalent):** Autonomous synthetic client journey sensor measuring 7 sequential link phases: 802.11 Assoc, 802.1X Auth, DHCP DORA, DNS query, Gateway ping, Cloud HTTP, and Throughput benchmarks.
+  3. 🧪 **Synthetic UXI Probe Engine:** Autonomous synthetic client journey sensor measuring 7 sequential link phases: 802.11 Assoc, 802.1X Auth, DHCP DORA, DNS query, Gateway ping, Cloud HTTP, and Throughput benchmarks.
   4. 🛡️ **WIDS / WIPS Rogue AP Threat Containment (RFProtect):** Detects unauthorized Rogue APs and Evil Twin corporate SSID spoofers, with one-click automated 802.11 deauthentication airtime containment.
   5. 📹 **Layer-7 AppRF & UCC Telemetry (Zoom / Teams):** Tracks Mean Opinion Score (MOS 1.0–5.0), packet jitter (ms), and UDP loss (%) for VoIP/video conferences correlated with L2 Wi-Fi frame retries.
   6. 📈 **Statistical Baseline Anomaly Detection (AI Insights):** Calculates Z-scores against rolling performance baselines to detect abnormal airtime utilization surges before tickets are filed.

@@ -372,7 +372,7 @@ class TelemetryClient:
             )
         return simulator.resolve_dhcp_pool()
 
-    # ---------------- Advanced Aruba-Competitive Capabilities ----------------
+    # ---------------- Advanced Enterprise Capabilities ----------------
 
     def optimize_campus_rf_plan(self) -> AirMatchPlan:
         """Runs the AirMatch dynamic RF optimization engine."""

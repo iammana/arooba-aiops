@@ -437,11 +437,11 @@ class SimulatorEngine:
     def get_network_services(self) -> NetworkServicesStatus:
         return self.services
 
-    # ---------------- Aruba-Competitive Advanced Features ----------------
+    # ---------------- Advanced Enterprise Features ----------------
 
     def optimize_campus_rf_plan(self) -> AirMatchPlan:
         """
-        Algorithmic RF Plan Optimizer (Competes with Aruba AirMatch).
+        Algorithmic RF Plan Optimizer.
         Uses a graph-coloring interference minimizer to assign non-overlapping
         channels and auto-tune transmit power across all APs in the campus topology.
         """
@@ -515,7 +515,7 @@ class SimulatorEngine:
 
     def run_synthetic_uxi_test(self, target_ap_id: Optional[str] = None) -> UxiSensorReport:
         """
-        Runs synthetic client journey probe across link phases (Competes with Aruba UXI).
+        Runs synthetic client journey probe across link phases.
         Tests: Association -> 802.1X -> DHCP DORA -> DNS -> Gateway Ping -> Cloud HTTP -> Throughput.
         """
         now_ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -595,7 +595,7 @@ class SimulatorEngine:
 
     def scan_wids_security_threats(self) -> List[SecurityThreat]:
         """
-        WIDS / WIPS Rogue AP & Threat Scanner (Competes with Aruba RFProtect).
+        WIDS / WIPS Rogue AP & Threat Scanner.
         Scans for rogue BSSIDs, evil twins, and deauth floods.
         """
         return list(self.threats.values())
@@ -634,7 +634,7 @@ class SimulatorEngine:
 
     def get_application_qoe(self, identifier: str) -> Optional[AppQoEMetrics]:
         """
-        Application Quality of Experience (QoE / UCC) Telemetry (Competes with Aruba AppRF / UCC).
+        Application Quality of Experience (QoE / UCC) Telemetry.
         Returns Mean Opinion Score (MOS), jitter, and packet loss for Zoom & Teams.
         """
         client = self.get_client(identifier)
@@ -668,7 +668,7 @@ class SimulatorEngine:
 
     def get_baseline_anomalies(self, ap_id: Optional[str] = None) -> List[TelemetryAnomaly]:
         """
-        Telemetry Baseline & Anomaly Detection (Competes with Aruba Central AI Insights).
+        Telemetry Baseline & Anomaly Detection.
         Computes Z-scores (Z = (X - mean) / std) across airtime utilization and frame retry rates.
         """
         anomalies: List[TelemetryAnomaly] = []

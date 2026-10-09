@@ -1,6 +1,6 @@
 """
 Unit and Integration Tests for Advanced Enterprise Features:
-- Aruba AirMatch RF Optimizer
+- AirMatch RF Optimizer
 - Synthetic UXI Probe Engine
 - WIDS / WIPS Rogue AP Threat Containment
 - Application Quality of Experience (QoE / UCC)
